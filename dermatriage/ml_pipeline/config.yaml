@@ -1,0 +1,105 @@
+# ============================================================================
+# DermaTriage — ML Pipeline Configuration
+# Skin disease triage: teacher training, GAN augmentation, KD, quantisation.
+# All hyperparameters for the project live here. Override via CLI as needed.
+# ============================================================================
+
+# ----------------------------------------------------------------------------
+# Data
+# ----------------------------------------------------------------------------
+data:
+  fitzpatrick17k_path: data/raw/fitzpatrick17k
+  ham10000_path: data/raw/ham10000
+  synthetic_path: data/synthetic
+  processed_path: data/processed
+  image_size: 224
+  num_classes: 12
+  splits:
+    train: 0.80
+    val: 0.10
+    test: 0.10
+  class_names:
+    - melanoma
+    - basal_cell_carcinoma
+    - squamous_cell_carcinoma
+    - tinea_infection
+    - eczema_dermatitis
+    - psoriasis
+    - vitiligo
+    - scabies
+    - keloid
+    - acne_vulgaris
+    - hyperpigmentation
+    - other_ntd
+  # Fitzpatrick skin phototypes considered "dark" for equity evaluation.
+  fitzpatrick_dark_types: [4, 5, 6]
+
+# ----------------------------------------------------------------------------
+# Teacher model (high-capacity, trained on real + synthetic data)
+# ----------------------------------------------------------------------------
+teacher:
+  architecture: efficientnet_b4
+  pretrained: true
+  epochs: 50
+  batch_size: 32
+  lr: 1.0e-4
+  weight_decay: 1.0e-5
+  scheduler: cosine
+  warmup_epochs: 5
+  label_smoothing: 0.1
+
+# ----------------------------------------------------------------------------
+# Knowledge distillation (teacher -> compact student for on-device inference)
+# ----------------------------------------------------------------------------
+distillation:
+  student_architecture: mobilenetv3_small
+  temperature: 4.0
+  alpha: 0.3            # weight on soft (KD) loss vs. hard (CE) loss
+  epochs: 40
+  batch_size: 64
+  lr: 3.0e-4
+
+# ----------------------------------------------------------------------------
+# GAN augmentation (WGAN-GP) — synthesise dark-skin disease images
+# ----------------------------------------------------------------------------
+gan:
+  architecture: wgan_gp
+  z_dim: 100
+  fitzpatrick_classes: [4, 5, 6]
+  disease_classes: 8
+  epochs: 200
+  batch_size: 16
+  lr_g: 2.0e-4
+  lr_d: 2.0e-4
+  beta1: 0.0
+  beta2: 0.9
+  n_critic: 5            # discriminator updates per generator update
+  lambda_gp: 10          # gradient penalty coefficient
+  synthetic_ratio: 0.30  # fraction of synthetic samples added to training set
+
+# ----------------------------------------------------------------------------
+# Quantisation (export student to TFLite for mobile deployment)
+# ----------------------------------------------------------------------------
+quantisation:
+  mode: int8_dynamic
+  tflite_output_path: models/student_int8.tflite
+  target_size_mb: 10
+  target_latency_ms: 2000
+
+# ----------------------------------------------------------------------------
+# Evaluation — Deployment Viability Score (DVS) and accuracy targets
+# ----------------------------------------------------------------------------
+evaluation:
+  dvs_weights:
+    accuracy: 0.40
+    latency: 0.25
+    model_size: 0.15
+    equity: 0.20
+  top1_target: 0.78
+
+# ----------------------------------------------------------------------------
+# Experiment tracking
+# ----------------------------------------------------------------------------
+wandb:
+  entity: dermatriage
+  project: dermatriage-ml
