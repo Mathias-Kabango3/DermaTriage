@@ -10,13 +10,14 @@ SCRIPTS := scripts
 
 .PHONY: data teacher gan distill export evaluate audit all clean
 
-## data: prepare, harmonise labels and split datasets
+## data: download datasets, harmonise labels and split into train/val/test
 data:
-	$(PYTHON) $(SCRIPTS)/01_prepare_data.py --config $(CONFIG)
+	bash $(SCRIPTS)/01_download_data.sh
+	$(PYTHON) $(SCRIPTS)/02_preprocess.py --config $(CONFIG)
 
 ## gan: train WGAN-GP and generate synthetic dark-skin images
 gan:
-	$(PYTHON) $(SCRIPTS)/02_train_gan.py --config $(CONFIG)
+	$(PYTHON) $(SCRIPTS)/04_train_gan.py --config $(CONFIG)
 
 ## teacher: train the EfficientNet-B4 teacher model
 teacher:
@@ -28,7 +29,7 @@ distill:
 
 ## export: quantise and export the student to TFLite
 export:
-	$(PYTHON) $(SCRIPTS)/06_export_tflite.py --config $(CONFIG)
+	$(PYTHON) $(SCRIPTS)/06_quantise_export.py --config $(CONFIG)
 
 ## evaluate: evaluate models and compute the Deployment Viability Score
 evaluate:
@@ -36,7 +37,7 @@ evaluate:
 
 ## audit: run the Fitzpatrick equity / fairness audit
 audit:
-	$(PYTHON) $(SCRIPTS)/08_audit_equity.py --config $(CONFIG)
+	$(PYTHON) $(SCRIPTS)/08_bias_audit.py --config $(CONFIG)
 
 ## all: run the full pipeline end to end
 all: data gan teacher distill export evaluate audit
