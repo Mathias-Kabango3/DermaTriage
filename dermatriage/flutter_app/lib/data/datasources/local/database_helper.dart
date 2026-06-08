@@ -124,4 +124,16 @@ class DatabaseHelper {
       _db = null;
     }
   }
+
+  /// Delete all patient/encounter/evaluation data and recreate the schema.
+  ///
+  /// The disease_classes reference table is re-seeded. Used by the
+  /// "Reset All Data" action in settings.
+  Future<void> resetDatabase() async {
+    final String dbPath = await getDatabasesPath();
+    final String path = p.join(dbPath, AppConstants.databaseName);
+    await close();
+    await deleteDatabase(path);
+    _db = await _initDb(); // triggers _onCreate (+ reseed) on the fresh file
+  }
 }

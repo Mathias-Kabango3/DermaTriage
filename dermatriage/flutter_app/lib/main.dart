@@ -7,6 +7,7 @@ import 'core/theme/app_theme.dart';
 import 'presentation/providers/history_provider.dart';
 import 'presentation/providers/patient_provider.dart';
 import 'presentation/providers/triage_provider.dart';
+import 'presentation/widgets/common/consent_dialog.dart';
 
 void main() {
   runApp(const DermaTriage());
@@ -35,7 +36,41 @@ class DermaTriage extends StatelessWidget {
         theme: AppTheme.light,
         routerConfig: appRouter,
         debugShowCheckedModeBanner: false,
+        builder: (BuildContext context, Widget? child) {
+          return _ConsentGate(child: child ?? const SizedBox.shrink());
+        },
       ),
     );
   }
+}
+
+/// Shows the first-launch [ConsentDialog] once, then renders the app.
+class _ConsentGate extends StatefulWidget {
+  final Widget child;
+
+  const _ConsentGate({required this.child});
+
+  @override
+  State<_ConsentGate> createState() => _ConsentGateState();
+}
+
+class _ConsentGateState extends State<_ConsentGate> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _maybeShowConsent());
+  }
+
+  Future<void> _maybeShowConsent() async {
+    final bool accepted = await ConsentDialog.hasAccepted();
+    if (accepted || !mounted) return;
+    // Use the router's navigator context so the dialog sits inside a Navigator.
+    final BuildContext? navContext = rootNavigatorKey.currentContext;
+    if (navContext != null) {
+      await ConsentDialog.show(navContext);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }

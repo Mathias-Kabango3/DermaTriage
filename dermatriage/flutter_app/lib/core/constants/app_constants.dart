@@ -4,6 +4,8 @@ class AppConstants {
 
   // App identity
   static const String appName = 'DermaTriage';
+  static const String appVersion = '1.0.0';
+  static const String modelVersionAssetPath = 'assets/models/model_version.txt';
 
   // Model / inference
   static const String modelAssetPath =

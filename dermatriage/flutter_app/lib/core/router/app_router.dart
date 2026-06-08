@@ -1,14 +1,20 @@
+import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../presentation/screens/camera/camera_screen.dart';
-import '../../presentation/screens/history_screen.dart';
+import '../../presentation/screens/history/history_screen.dart';
 import '../../presentation/screens/home/home_screen.dart';
 import '../../presentation/screens/patient/patient_registration_screen.dart';
 import '../../presentation/screens/result/result_screen.dart';
-import '../../presentation/screens/settings_screen.dart';
+import '../../presentation/screens/settings/settings_screen.dart';
+
+/// Root navigator key — used to show app-level dialogs (e.g. consent) from
+/// above the router's page navigator.
+final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
 
 /// Application route table.
 final GoRouter appRouter = GoRouter(
+  navigatorKey: rootNavigatorKey,
   initialLocation: '/',
   routes: <RouteBase>[
     GoRoute(

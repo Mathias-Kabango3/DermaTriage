@@ -164,3 +164,11 @@ DiseaseClass getDiseaseByIndex(int index) {
   }
   return kDiseaseClasses[index];
 }
+
+/// Look up a [DiseaseClass] by its string [id], or null if unknown.
+DiseaseClass? getDiseaseById(String id) {
+  for (final DiseaseClass d in kDiseaseClasses) {
+    if (d.id == id) return d;
+  }
+  return null;
+}
