@@ -25,7 +25,7 @@ class Patient {
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
-      'id': id,
+      'patient_id': id,
       'approximate_age': approximateAge,
       'sex': sex,
       'location': location,
@@ -38,7 +38,7 @@ class Patient {
 
   factory Patient.fromMap(Map<String, dynamic> map) {
     return Patient(
-      id: map['id'] as String,
+      id: map['patient_id'] as String,
       approximateAge: map['approximate_age'] as int?,
       sex: map['sex'] as String,
       location: map['location'] as String,
