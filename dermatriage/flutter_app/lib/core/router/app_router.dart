@@ -2,8 +2,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../presentation/screens/camera_screen.dart';
 import '../../presentation/screens/history_screen.dart';
-import '../../presentation/screens/home_screen.dart';
-import '../../presentation/screens/patient_registration_screen.dart';
+import '../../presentation/screens/home/home_screen.dart';
+import '../../presentation/screens/patient/patient_registration_screen.dart';
 import '../../presentation/screens/result_screen.dart';
 import '../../presentation/screens/settings_screen.dart';
 

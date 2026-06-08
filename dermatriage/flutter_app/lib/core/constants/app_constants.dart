@@ -15,6 +15,12 @@ class AppConstants {
   static const String databaseName = 'dermatriage.db';
   static const int databaseVersion = 1;
 
+  /// Short disclaimer for the persistent banner (see [ethicsDisclaimer] for
+  /// the full text shown on first launch).
+  static const String disclaimer =
+      'Not a diagnostic tool. AI suggestions support — never replace — '
+      'clinical judgement. When in doubt, refer the patient.';
+
   /// Ethics & safety disclaimer (proposal Section 4.4).
   ///
   /// Shown to the community health worker on first launch and accessible from
