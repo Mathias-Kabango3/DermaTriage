@@ -4,7 +4,7 @@ import '../../presentation/screens/camera/camera_screen.dart';
 import '../../presentation/screens/history_screen.dart';
 import '../../presentation/screens/home/home_screen.dart';
 import '../../presentation/screens/patient/patient_registration_screen.dart';
-import '../../presentation/screens/result_screen.dart';
+import '../../presentation/screens/result/result_screen.dart';
 import '../../presentation/screens/settings_screen.dart';
 
 /// Application route table.
