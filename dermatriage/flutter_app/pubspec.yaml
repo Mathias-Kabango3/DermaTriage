@@ -1,0 +1,51 @@
+name: dermatriage
+description: "DermaTriage — offline AI-assisted skin disease triage for community health workers."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.1.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # On-device inference
+  tflite_flutter: ^0.10.4
+  image: ^4.1.3
+
+  # Camera & permissions
+  camera: ^0.10.5
+  permission_handler: ^11.1.0
+
+  # State management
+  provider: ^6.1.1
+
+  # Local persistence
+  sqflite: ^2.3.0
+  path: ^1.8.3
+  shared_preferences: ^2.2.2
+
+  # Navigation
+  go_router: ^12.1.1
+
+  # UI / assets
+  cupertino_icons: ^1.0.6
+  flutter_svg: ^2.0.9
+
+  # Utilities
+  uuid: ^4.2.1
+  intl: ^0.18.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/models/
+    - assets/images/
+    - assets/fonts/
