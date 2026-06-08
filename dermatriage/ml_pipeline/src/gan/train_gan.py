@@ -115,6 +115,23 @@ def _load_dark_skin_subset(cfg):
     return subset
 
 
+def build_condition_mapping(cfg):
+    """Reconstruct the (fitz_classes, disease_to_idx) condition mapping.
+
+    Mirrors exactly the mapping that ``GANConditionDataset`` builds at training
+    time, so synthetic-image export uses identical condition encodings.
+
+    Returns:
+        tuple: ``(fitz_classes, disease_to_idx)`` where ``disease_to_idx`` maps
+        a harmonised ``label_idx`` to its contiguous disease one-hot position.
+    """
+    subset = _load_dark_skin_subset(cfg)
+    fitz_classes = list(cfg["gan"]["fitzpatrick_classes"])
+    unique_labels = sorted(subset["label_idx"].unique())
+    disease_to_idx = {int(lab): i for i, lab in enumerate(unique_labels)}
+    return fitz_classes, disease_to_idx
+
+
 # ----------------------------------------------------------------------------
 # Simple FID approximation (no external pytorch_fid dependency).
 # ----------------------------------------------------------------------------

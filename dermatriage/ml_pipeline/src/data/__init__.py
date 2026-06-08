@@ -1,6 +1,7 @@
 """Data loading, preprocessing and label harmonisation."""
 
-from . import dataloader, dataset, harmonise_labels, preprocessing
+from . import augmentation, dataloader, dataset, harmonise_labels, preprocessing
+from .augmentation import merge_real_and_synthetic
 from .dataloader import build_dataloaders
 from .dataset import SkinDataset
 from .harmonise_labels import (
@@ -13,10 +14,12 @@ from .harmonise_labels import (
 from .preprocessing import build_manifest
 
 __all__ = [
+    "augmentation",
     "dataloader",
     "dataset",
     "harmonise_labels",
     "preprocessing",
+    "merge_real_and_synthetic",
     "build_dataloaders",
     "SkinDataset",
     "CLASS_TO_IDX",
