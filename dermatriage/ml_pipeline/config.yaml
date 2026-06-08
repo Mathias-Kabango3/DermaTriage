@@ -98,6 +98,7 @@ evaluation:
     model_size: 0.15
     equity: 0.20
   top1_target: 0.78
+  metrics_output: outputs/metrics  # where eval reports / plots are written
 
 # ----------------------------------------------------------------------------
 # Experiment tracking
