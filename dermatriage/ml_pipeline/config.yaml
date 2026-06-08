@@ -76,6 +76,8 @@ gan:
   n_critic: 5            # discriminator updates per generator update
   lambda_gp: 10          # gradient penalty coefficient
   synthetic_ratio: 0.30  # fraction of synthetic samples added to training set
+  checkpoint_every: 25   # save a GAN checkpoint every N epochs
+  checkpoint_dir: models/gan  # where GAN checkpoints are written
 
 # ----------------------------------------------------------------------------
 # Quantisation (export student to TFLite for mobile deployment)

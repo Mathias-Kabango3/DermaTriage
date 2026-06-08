@@ -2,8 +2,6 @@
 
 import logging
 
-import wandb
-
 _LOG_FORMAT = "%(asctime)s | %(levelname)-8s | %(name)s | %(message)s"
 _DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 
@@ -35,6 +33,8 @@ def init_wandb(cfg, job_type):
     Returns:
         The active ``wandb`` run.
     """
+    import wandb  # imported lazily so the package works without wandb installed
+
     wandb_cfg = cfg["wandb"]
     return wandb.init(
         entity=wandb_cfg["entity"],
