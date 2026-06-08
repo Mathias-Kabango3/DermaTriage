@@ -1,0 +1,15 @@
+PLACEHOLDER — not a real PNG image.
+
+The Grad-CAM explanation overlay is generated at runtime, not shipped as a
+static asset. See:
+  lib/presentation/widgets/result/gradcam_overlay.dart
+
+Behaviour:
+- If a TriageResult carries a heatmapPath pointing to an existing file, that
+  heatmap is blended over the captured photo at 50% opacity.
+- Otherwise (the current placeholder model produces no heatmap), the overlay
+  shows the message: "Explanation unavailable for placeholder model".
+
+When on-device Grad-CAM is implemented, the generated heatmap image will be
+written to the app's documents directory and referenced via heatmapPath — no
+bundled placeholder image is required.
