@@ -67,12 +67,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _resetData() async {
     setState(() => _resetting = true);
-    await DatabaseHelper.instance.resetDatabase();
-    if (!mounted) return;
+    // Capture providers before the async gaps.
+    final history = context.read<HistoryProvider>();
+    final patients = context.read<PatientProvider>();
 
-    // Refresh in-memory provider state.
-    await context.read<HistoryProvider>().loadEncounters();
-    await context.read<PatientProvider>().loadPatients();
+    await DatabaseHelper.instance.resetDatabase();
+    await history.loadEncounters();
+    await patients.loadPatients();
     if (!mounted) return;
 
     setState(() => _resetting = false);
@@ -88,10 +89,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
       body: ListView(
         children: <Widget>[
           const _SectionHeader('About'),
-          ListTile(
-            leading: const Icon(Icons.info_outline),
-            title: const Text('App version'),
-            trailing: const Text(AppConstants.appVersion),
+          const ListTile(
+            leading: Icon(Icons.info_outline),
+            title: Text('App version'),
+            trailing: Text(AppConstants.appVersion),
           ),
           ListTile(
             leading: const Icon(Icons.memory),

@@ -18,7 +18,7 @@ class HomeScreen extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.history),
             tooltip: 'History',
-            onPressed: () => context.go('/history'),
+            onPressed: () => context.push('/history'),
           ),
         ],
       ),
@@ -70,14 +70,14 @@ class HomeScreen extends StatelessWidget {
                     ElevatedButton.icon(
                       icon: const Icon(Icons.camera_alt),
                       label: const Text('Start New Triage'),
-                      onPressed: () => context.go('/patient/register'),
+                      onPressed: () => context.push('/patient/register'),
                     ),
                     const SizedBox(height: 12),
                     // Secondary action.
                     TextButton.icon(
                       icon: const Icon(Icons.history),
                       label: const Text('View History'),
-                      onPressed: () => context.go('/history'),
+                      onPressed: () => context.push('/history'),
                     ),
                   ],
                 ),

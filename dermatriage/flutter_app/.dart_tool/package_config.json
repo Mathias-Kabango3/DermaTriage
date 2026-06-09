@@ -531,9 +531,9 @@
     },
     {
       "name": "tflite_flutter",
-      "rootUri": "file:///Users/apple/.pub-cache/hosted/pub.dev/tflite_flutter-0.10.4",
+      "rootUri": "file:///Users/apple/.pub-cache/hosted/pub.dev/tflite_flutter-0.11.0",
       "packageUri": "lib/",
-      "languageVersion": "2.18"
+      "languageVersion": "3.3"
     },
     {
       "name": "typed_data",

@@ -80,7 +80,7 @@ class _PatientRegistrationScreenState
     );
 
     context.read<PatientProvider>().registerPatient(patient);
-    context.go('/camera');
+    context.push('/camera');
   }
 
   @override

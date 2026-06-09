@@ -27,10 +27,20 @@ class _CameraScreenState extends State<CameraScreen>
   CameraController? _controller;
   List<CameraDescription> _cameras = <CameraDescription>[];
   int _cameraIndex = 0;
-  bool _permissionDenied = false;
+  String? _unavailableReason; // non-null => show the unavailable view
+  bool _permissionIssue = false; // true => offer "Open App Settings"
   bool _flashOn = false;
   bool _capturing = false;
   int? _fitzType;
+
+  void _setUnavailable(String reason, {required bool permission}) {
+    if (mounted) {
+      setState(() {
+        _unavailableReason = reason;
+        _permissionIssue = permission;
+      });
+    }
+  }
 
   @override
   void initState() {
@@ -60,13 +70,20 @@ class _CameraScreenState extends State<CameraScreen>
   Future<void> _setup() async {
     final PermissionStatus status = await Permission.camera.request();
     if (!status.isGranted) {
-      if (mounted) setState(() => _permissionDenied = true);
+      _setUnavailable(
+        'Camera permission is required to capture a lesion photo.',
+        permission: true,
+      );
       return;
     }
 
     _cameras = await availableCameras();
     if (_cameras.isEmpty) {
-      if (mounted) setState(() => _permissionDenied = true);
+      _setUnavailable(
+        'No camera is available on this device. The iOS Simulator has no '
+        'camera — run on a physical device to capture photos.',
+        permission: false,
+      );
       return;
     }
     await _initController(_cameras[_cameraIndex]);
@@ -83,10 +100,10 @@ class _CameraScreenState extends State<CameraScreen>
       await controller.initialize();
       await controller.setFlashMode(FlashMode.off);
     } on CameraException {
-      if (mounted) setState(() => _permissionDenied = true);
+      _setUnavailable('Could not start the camera.', permission: false);
       return;
     }
-    if (mounted) setState(() {});
+    if (mounted) setState(() => _unavailableReason = null);
   }
 
   Future<void> _toggleFlash() async {
@@ -124,7 +141,7 @@ class _CameraScreenState extends State<CameraScreen>
 
       if (!mounted) return;
       context.read<TriageProvider>().setCapturedImage(File(savedPath));
-      context.go('/result');
+      context.push('/result');
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -137,8 +154,13 @@ class _CameraScreenState extends State<CameraScreen>
 
   @override
   Widget build(BuildContext context) {
-    if (_permissionDenied) {
-      return _PermissionDeniedView(onRetry: _setup);
+    if (_unavailableReason != null) {
+      return _CameraUnavailableView(
+        message: _unavailableReason!,
+        showSettings: _permissionIssue,
+        onRetry: _setup,
+        onBack: () => context.pop(),
+      );
     }
 
     final CameraController? controller = _controller;
@@ -162,7 +184,7 @@ class _CameraScreenState extends State<CameraScreen>
               alignment: Alignment.topLeft,
               child: IconButton(
                 icon: const Icon(Icons.arrow_back, color: Colors.white),
-                onPressed: () => context.go('/patient/register'),
+                onPressed: () => context.pop(),
               ),
             ),
           ),
@@ -229,16 +251,30 @@ class _CameraScreenState extends State<CameraScreen>
   }
 }
 
-/// Shown when camera permission is unavailable.
-class _PermissionDeniedView extends StatelessWidget {
+/// Shown when the camera can't be used (no camera or permission denied).
+class _CameraUnavailableView extends StatelessWidget {
+  final String message;
+  final bool showSettings;
   final VoidCallback onRetry;
+  final VoidCallback onBack;
 
-  const _PermissionDeniedView({required this.onRetry});
+  const _CameraUnavailableView({
+    required this.message,
+    required this.showSettings,
+    required this.onRetry,
+    required this.onBack,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Camera')),
+      appBar: AppBar(
+        title: const Text('Camera'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: onBack,
+        ),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -247,20 +283,27 @@ class _PermissionDeniedView extends StatelessWidget {
             const Icon(Icons.no_photography,
                 size: 64, color: AppColors.textSecondary),
             const SizedBox(height: 16),
-            const Text(
-              'Camera permission is required to capture a lesion photo.',
+            Text(
+              message,
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 16),
+              style: const TextStyle(fontSize: 16),
             ),
             const SizedBox(height: 24),
             ElevatedButton(
               onPressed: onRetry,
-              child: const Text('Grant Permission'),
+              child: const Text('Try Again'),
             ),
+            if (showSettings) ...<Widget>[
+              const SizedBox(height: 12),
+              const TextButton(
+                onPressed: openAppSettings,
+                child: Text('Open App Settings'),
+              ),
+            ],
             const SizedBox(height: 12),
             TextButton(
-              onPressed: openAppSettings,
-              child: const Text('Open App Settings'),
+              onPressed: onBack,
+              child: const Text('Go Back'),
             ),
           ],
         ),

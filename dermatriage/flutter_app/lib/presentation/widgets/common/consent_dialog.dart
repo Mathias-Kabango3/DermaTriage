@@ -37,18 +37,18 @@ class ConsentDialog extends StatelessWidget {
       canPop: false, // must explicitly accept
       child: AlertDialog(
         title: const Text('Before you begin'),
-        content: SingleChildScrollView(
+        content: const SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              const Text(
+              Text(
                 '${AppConstants.appName} is a research prototype, not an '
                 'approved medical device.',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 12),
-              const Text(AppConstants.ethicsDisclaimer),
+              SizedBox(height: 12),
+              Text(AppConstants.ethicsDisclaimer),
             ],
           ),
         ),

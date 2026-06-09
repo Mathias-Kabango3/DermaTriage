@@ -66,7 +66,7 @@ class _ConsentGateState extends State<_ConsentGate> {
     if (accepted || !mounted) return;
     // Use the router's navigator context so the dialog sits inside a Navigator.
     final BuildContext? navContext = rootNavigatorKey.currentContext;
-    if (navContext != null) {
+    if (navContext != null && navContext.mounted) {
       await ConsentDialog.show(navContext);
     }
   }
