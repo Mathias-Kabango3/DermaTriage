@@ -43,3 +43,13 @@ kotlin {
 flutter {
     source = "../.."
 }
+
+// tflite_flutter pulls the TensorFlow Lite Java AARs (2.11.0), which share the
+// namespace 'org.tensorflow.lite' and fail AGP 8's manifest merger. The plugin
+// uses the native C library via FFI (built with CMake) and does not reference
+// these Java classes, so excluding them resolves the collision safely.
+configurations.all {
+    exclude(group = "org.tensorflow", module = "tensorflow-lite")
+    exclude(group = "org.tensorflow", module = "tensorflow-lite-gpu")
+    exclude(group = "org.tensorflow", module = "tensorflow-lite-api")
+}
