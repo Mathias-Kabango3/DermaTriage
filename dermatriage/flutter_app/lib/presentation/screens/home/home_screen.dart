@@ -3,9 +3,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/colors.dart';
-import '../../widgets/common/disclaimer_banner.dart';
 
-/// Landing screen: branding, persistent disclaimer and primary actions.
+/// Landing screen: branding and primary actions.
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
@@ -83,8 +82,6 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
             ),
-            // Persistent, non-dismissible disclaimer.
-            const DisclaimerBanner(),
             // Footer.
             Container(
               width: double.infinity,
