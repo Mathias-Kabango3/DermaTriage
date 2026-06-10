@@ -1,3 +1,4 @@
+# HAM10000-only config — extend to 12 classes when Fitzpatrick17k is available
 # ============================================================================
 # DermaTriage — ML Pipeline Configuration
 # Skin disease triage: teacher training, GAN augmentation, KD, quantisation.
@@ -8,31 +9,28 @@
 # Data
 # ----------------------------------------------------------------------------
 data:
-  fitzpatrick17k_path: data/raw/fitzpatrick17k
+  fitzpatrick17k_path: null
   ham10000_path: data/raw/ham10000
   synthetic_path: data/synthetic
   processed_path: data/processed
   image_size: 224
-  num_classes: 12
+  num_classes: 7
   splits:
     train: 0.80
     val: 0.10
     test: 0.10
+  # HAM10000 classes, ordered to match the HAM10000 label codes (mel, nv, bcc,
+  # akiec, bkl, df, vasc).
   class_names:
-    - melanoma
-    - basal_cell_carcinoma
-    - squamous_cell_carcinoma
-    - tinea_infection
-    - eczema_dermatitis
-    - psoriasis
-    - vitiligo
-    - scabies
-    - keloid
-    - acne_vulgaris
-    - hyperpigmentation
-    - other_ntd
-  # Fitzpatrick skin phototypes considered "dark" for equity evaluation.
-  fitzpatrick_dark_types: [4, 5, 6]
+    - melanoma           # mel
+    - melanocytic_nevus  # nv
+    - basal_cell_carcinoma  # bcc
+    - actinic_keratosis  # akiec
+    - benign_keratosis   # bkl
+    - dermatofibroma     # df
+    - vascular_lesion    # vasc
+  # No Fitzpatrick labels in HAM10000 — GAN augmentation deferred until Fitzpatrick17k arrives
+  fitzpatrick_dark_types: []
 
 # ----------------------------------------------------------------------------
 # Teacher model (high-capacity, trained on real + synthetic data)
@@ -40,7 +38,7 @@ data:
 teacher:
   architecture: efficientnet_b4
   pretrained: true
-  epochs: 50
+  epochs: 30  # HAM10000 is smaller and converges faster than the 12-class set
   batch_size: 32
   lr: 1.0e-4
   weight_decay: 1.0e-5

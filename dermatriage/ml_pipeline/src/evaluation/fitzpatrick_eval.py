@@ -17,10 +17,12 @@ logger = get_logger(__name__)
 def evaluate_fitzpatrick_stratified(model, loader, device):
     """Accuracy broken down by Fitzpatrick skin type.
 
-    Uses the per-sample ``fitzpatrick`` field from each batch.
+    Uses the per-sample ``fitzpatrick`` field from each batch. Samples with
+    ``fitzpatrick == -1`` (no skin-type label, e.g. HAM10000) are skipped.
 
     Returns:
-        dict: ``{fitzpatrick_type: accuracy}`` sorted by type.
+        dict: ``{fitzpatrick_type: accuracy}`` sorted by type, or an empty dict
+        if no labelled samples are present.
     """
     model.eval()
     correct = {}
@@ -34,8 +36,17 @@ def evaluate_fitzpatrick_stratified(model, loader, device):
         preds = model(images).argmax(dim=1)
         hit = (preds == labels).cpu()
         for ft, is_correct in zip(fitz.tolist(), hit.tolist()):
+            if ft == -1:
+                continue  # no Fitzpatrick label for this sample
             total[ft] = total.get(ft, 0) + 1
             correct[ft] = correct.get(ft, 0) + int(is_correct)
+
+    if not total:
+        logger.warning(
+            "No Fitzpatrick labels in this dataset. Fitzpatrick-stratified "
+            "evaluation skipped. Will be enabled when Fitzpatrick17k is added."
+        )
+        return {}
 
     accuracies = {ft: correct[ft] / total[ft] for ft in sorted(total)}
     logger.info("Fitzpatrick-stratified accuracy: %s",

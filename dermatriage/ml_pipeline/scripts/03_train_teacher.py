@@ -136,11 +136,19 @@ def main():
     teacher_cfg = cfg["teacher"]
     epochs = teacher_cfg["epochs"]
     freeze_epochs = teacher_cfg.get("freeze_epochs", DEFAULT_FREEZE_EPOCHS)
+    logger.info(
+        "Training on HAM10000 only (%d classes). Fitzpatrick-stratified "
+        "metrics disabled until Fitzpatrick17k is available.",
+        cfg["data"]["num_classes"],
+    )
     logger.info("Training teacher on %s for %d epochs", device, epochs)
 
     run = None
     if not args.no_wandb:
         run = init_wandb(cfg, job_type="train_teacher")
+        if run is not None:
+            # Label the run so HAM10000-only results are clearly distinguished.
+            run.name = f"teacher_ham10000_only_{run.id}"
 
     # --- Data ---
     train_loader, val_loader, _ = build_dataloaders(

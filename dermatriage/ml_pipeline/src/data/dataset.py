@@ -58,6 +58,8 @@ class SkinDataset(Dataset):
         row = self.df.iloc[idx]
         image = Image.open(row["image_path"]).convert("RGB")
         image = self.transform(image)
+        # fitzpatrick=-1 means no skin type label available (HAM10000).
+        # Fitzpatrick-stratified metrics will be skipped for these samples.
         return {
             "image": image,
             "label": int(row["label_idx"]),

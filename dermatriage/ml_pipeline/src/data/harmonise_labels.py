@@ -124,18 +124,62 @@ HAM10000_MAP = {
     "vasc": "other_ntd",
 }
 
-_SOURCE_MAPS = {
-    "fitzpatrick17k": FITZPATRICK17K_MAP,
-    "ham10000": HAM10000_MAP,
+# ----------------------------------------------------------------------------
+# HAM10000-only 7-class taxonomy.
+#
+# While Fitzpatrick17k access is pending we train on HAM10000 alone, keeping its
+# native 7 diagnostic classes (no collapsing into the 12-class taxonomy). The
+# 12-class maps above are left untouched so the full pipeline still works once
+# Fitzpatrick17k arrives.
+# ----------------------------------------------------------------------------
+HAM10000_7CLASS_MAP = {
+    "mel": "melanoma",
+    "nv": "melanocytic_nevus",
+    "bcc": "basal_cell_carcinoma",
+    "akiec": "actinic_keratosis",
+    "bkl": "benign_keratosis",
+    "df": "dermatofibroma",
+    "vasc": "vascular_lesion",
+}
+
+# The 7 HAM10000 classes, in canonical order (index 0-6).
+HAM10000_7CLASSES = [
+    "melanoma",
+    "melanocytic_nevus",
+    "basal_cell_carcinoma",
+    "actinic_keratosis",
+    "benign_keratosis",
+    "dermatofibroma",
+    "vascular_lesion",
+]
+
+CLASS_TO_IDX_7 = {name: idx for idx, name in enumerate(HAM10000_7CLASSES)}
+
+TRIAGE_LEVEL_7 = {
+    "melanoma": URGENT_REFERRAL,
+    "melanocytic_nevus": MONITOR,
+    "basal_cell_carcinoma": URGENT_REFERRAL,
+    "actinic_keratosis": URGENT_REFERRAL,
+    "benign_keratosis": MONITOR,
+    "dermatofibroma": MONITOR,
+    "vascular_lesion": MONITOR,
+}
+
+# Registry of source -> (label_map, class_to_idx, triage_level).
+_SOURCE_REGISTRY = {
+    "fitzpatrick17k": (FITZPATRICK17K_MAP, CLASS_TO_IDX, TRIAGE_LEVEL),
+    "ham10000": (HAM10000_MAP, CLASS_TO_IDX, TRIAGE_LEVEL),
+    "ham10000_7class": (HAM10000_7CLASS_MAP, CLASS_TO_IDX_7, TRIAGE_LEVEL_7),
 }
 
 
 def harmonise_label(raw_label, source):
-    """Map a raw dataset label onto the harmonised taxonomy.
+    """Map a raw dataset label onto the appropriate taxonomy.
 
     Args:
         raw_label: The raw label string from the source dataset.
-        source: Either ``"fitzpatrick17k"`` or ``"ham10000"``.
+        source: One of ``"fitzpatrick17k"``, ``"ham10000"`` (both 12-class) or
+            ``"ham10000_7class"`` (the HAM10000-only 7-class taxonomy).
 
     Returns:
         tuple: ``(harmonised_id, class_idx, triage_level)``.
@@ -143,13 +187,13 @@ def harmonise_label(raw_label, source):
     Raises:
         ValueError: If the source or the label is not recognised.
     """
-    if source not in _SOURCE_MAPS:
+    if source not in _SOURCE_REGISTRY:
         raise ValueError(
             f"Unrecognised source {source!r}; "
-            f"expected one of {sorted(_SOURCE_MAPS)}."
+            f"expected one of {sorted(_SOURCE_REGISTRY)}."
         )
 
-    label_map = _SOURCE_MAPS[source]
+    label_map, idx_map, triage_map = _SOURCE_REGISTRY[source]
     key = raw_label.strip().lower()
     if key not in label_map:
         raise ValueError(
@@ -157,4 +201,4 @@ def harmonise_label(raw_label, source):
         )
 
     harmonised_id = label_map[key]
-    return harmonised_id, CLASS_TO_IDX[harmonised_id], TRIAGE_LEVEL[harmonised_id]
+    return harmonised_id, idx_map[harmonised_id], triage_map[harmonised_id]
