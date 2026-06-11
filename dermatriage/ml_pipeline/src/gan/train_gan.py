@@ -90,14 +90,21 @@ class GANConditionDataset(Dataset):
 
 
 def _load_dark_skin_subset(cfg):
-    """Read the train manifest and keep only the dark Fitzpatrick subset."""
+    """Read the train manifest and keep only PASSION dark-skin images.
+
+    Only PASSION provides real Fitzpatrick IV-VI images, so the GAN's real
+    training set is ``source == "passion"`` filtered to the dark Fitzpatrick
+    types. (HAM10000 has no skin-type labels and is excluded.)
+    """
     gan_cfg = cfg["gan"]
     processed_root = Path(cfg["data"]["processed_path"])
     manifest = processed_root / "train" / "manifest.csv"
     df = pd.read_csv(manifest)
 
     fitz_classes = gan_cfg["fitzpatrick_classes"]
-    subset = df[df["fitzpatrick_type"].isin(fitz_classes)].copy()
+    subset = df[
+        (df["source"] == "passion") & (df["fitzpatrick_type"].isin(fitz_classes))
+    ].copy()
 
     # Restrict to the configured number of disease classes (most frequent).
     disease_classes = gan_cfg["disease_classes"]
@@ -107,12 +114,67 @@ def _load_dark_skin_subset(cfg):
     subset = subset[subset["label_idx"].isin(top_labels)].copy()
 
     logger.info(
-        "GAN subset: %d images across Fitzpatrick %s and %d disease classes",
+        "GAN subset (PASSION only): %d images across Fitzpatrick %s and %d "
+        "disease classes",
         len(subset),
         fitz_classes,
         subset["label_idx"].nunique(),
     )
     return subset
+
+
+def plan_synthesis_targets(cfg, min_real=100, synthetic_ratio=0.30):
+    """Identify under-represented (fitzpatrick, class) pairs for GAN synthesis.
+
+    For each dark-skin (fitzpatrick_type, class) combination in the PASSION
+    training subset with fewer than ``min_real`` real images, compute how many
+    synthetic images are needed to reach the ``synthetic_ratio`` cap (default
+    30% synthetic : 70% real, i.e. synth <= ratio/(1-ratio) * real).
+
+    Returns:
+        list[dict]: one entry per target with current/target counts.
+    """
+    import pandas as pd  # local import to keep module import light
+
+    processed_root = Path(cfg["data"]["processed_path"])
+    df = pd.read_csv(processed_root / "train" / "manifest.csv")
+    fitz_classes = cfg["gan"]["fitzpatrick_classes"]
+    class_names = cfg["data"]["class_names"]
+
+    subset = df[
+        (df["source"] == "passion") & (df["fitzpatrick_type"].isin(fitz_classes))
+    ]
+    grouped = subset.groupby(["fitzpatrick_type", "label_idx"]).size()
+
+    plan = []
+    for (ftype, label_idx), n_real in grouped.items():
+        if n_real >= min_real:
+            continue
+        n_synth = int((synthetic_ratio / (1.0 - synthetic_ratio)) * n_real)
+        plan.append(
+            {
+                "fitzpatrick_type": int(ftype),
+                "label_idx": int(label_idx),
+                "class_name": class_names[int(label_idx)],
+                "real_images": int(n_real),
+                "synthetic_to_generate": n_synth,
+            }
+        )
+
+    logger.info("=" * 64)
+    logger.info(
+        "GAN synthesis plan: %d under-represented (fitzpatrick, class) pairs "
+        "(<%d real images, %d:%d synthetic:real cap)",
+        len(plan), min_real, int(synthetic_ratio * 100),
+        int((1 - synthetic_ratio) * 100),
+    )
+    for t in plan:
+        logger.info(
+            "  Fitz %d | %-22s real=%3d -> generate %3d synthetic",
+            t["fitzpatrick_type"], t["class_name"],
+            t["real_images"], t["synthetic_to_generate"],
+        )
+    return plan
 
 
 def build_condition_mapping(cfg):
@@ -235,6 +297,7 @@ def train_wgan_gp(cfg, device):
     ckpt_dir = Path(gan_cfg.get("checkpoint_dir", "models/gan"))
 
     # --- Data ---
+    plan_synthesis_targets(cfg)  # print which (fitz, class) pairs need synthesis
     subset = _load_dark_skin_subset(cfg)
     dataset = GANConditionDataset(
         subset,

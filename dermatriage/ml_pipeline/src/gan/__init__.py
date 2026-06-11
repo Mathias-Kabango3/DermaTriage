@@ -9,7 +9,7 @@ from .evaluate_gan import (
     generate_synthetic_batch,
 )
 from .generator import ConditionalGenerator
-from .train_gan import train_wgan_gp
+from .train_gan import plan_synthesis_targets, train_wgan_gp
 from .wgan_gp import compute_gradient_penalty
 
 __all__ = [
@@ -21,6 +21,7 @@ __all__ = [
     "ConditionalCritic",
     "ConditionalGenerator",
     "train_wgan_gp",
+    "plan_synthesis_targets",
     "compute_gradient_penalty",
     "compute_fid",
     "compute_inception_score",

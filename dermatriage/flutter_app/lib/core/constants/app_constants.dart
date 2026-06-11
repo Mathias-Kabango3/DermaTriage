@@ -11,7 +11,7 @@ class AppConstants {
   static const String modelAssetPath =
       'assets/models/skin_triage_model.tflite';
   static const int imageSize = 224;
-  static const int numClasses = 12;
+  static const int numClasses = 11; // HAM10000 (7) + PASSION (4) union schema
 
   // Local database
   static const String databaseName = 'dermatriage.db';

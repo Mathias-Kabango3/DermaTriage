@@ -1,15 +1,19 @@
 #!/usr/bin/env python
-"""Build and split the HAM10000-only manifest (7 classes).
+"""Build and split the merged HAM10000 + PASSION manifest (11-class union).
 
-While Fitzpatrick17k access is pending we train on HAM10000 alone, keeping its
-native 7 diagnostic classes. This script:
+Schema (see src/data/harmonise_labels.py):
+    indices 0-6  HAM10000 native classes (mel, nv, bcc, akiec, bkl, df, vasc)
+    indices 7-10 PASSION classes (tinea_infection, scabies, eczema_dermatitis,
+                 other_ntd)
 
-    1. Reads HAM10000_metadata.csv from cfg["data"]["ham10000_path"].
-    2. Resolves each image across HAM10000_images_part_1/ and _part_2/.
-    3. Maps the ``dx`` code to a 7-class label index.
-    4. Performs a lesion-level 80/10/10 split (group by lesion to avoid leakage
-       between duplicate images of the same lesion).
-    5. Saves data/processed/{train,val,test}/manifest.csv and reports stats.
+Steps:
+    1. Build the HAM10000 DataFrame from HAM10000_metadata.csv (fitzpatrick=-1).
+    2. Build the PASSION DataFrame from label.csv (real Fitzpatrick labels).
+    3. Merge and split 80/10/10 at the patient/lesion level (group by lesion for
+       HAM10000, by subject for PASSION) to prevent leakage.
+    4. Save data/processed/{train,val,test}/manifest.csv and report stats.
+
+Either source may be absent on disk; whatever is present is processed.
 
 Run from the ml_pipeline/ directory:
     python scripts/02_preprocess.py --config config.yaml
@@ -27,8 +31,9 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from src.data.harmonise_labels import (  # noqa: E402
-    CLASS_TO_IDX_7,
+    CLASS_TO_IDX_11,
     HAM10000_7CLASS_MAP,
+    PASSION_MAP,
 )
 from src.utils.config import load_config  # noqa: E402
 from src.utils.logger import get_logger  # noqa: E402
@@ -36,8 +41,8 @@ from src.utils.seed import set_seed  # noqa: E402
 
 logger = get_logger(__name__)
 
-METADATA_FILE = "HAM10000_metadata.csv"
-IMAGE_DIRS = ["HAM10000_images_part_1", "HAM10000_images_part_2"]
+GAN_TARGET_THRESHOLD = 50  # classes below this image count are flagged for GAN
+
 MANIFEST_COLUMNS = [
     "image_path",
     "label_idx",
@@ -46,88 +51,120 @@ MANIFEST_COLUMNS = [
     "is_synthetic",
 ]
 
+# HAM10000 layout.
+HAM_METADATA_FILE = "HAM10000_metadata.csv"
+HAM_IMAGE_DIRS = ["HAM10000_images_part_1", "HAM10000_images_part_2"]
+# PASSION layout (confirmed by inspecting the dataset).
+PASSION_METADATA_FILE = "label.csv"
+PASSION_IMAGE_DIR = "images"
 
-def _find_image(ham_root, image_id):
-    """Locate ``<image_id>.jpg`` across the two HAM10000 image folders."""
-    for sub in IMAGE_DIRS:
+
+def _find_ham_image(ham_root, image_id):
+    for sub in HAM_IMAGE_DIRS:
         candidate = ham_root / sub / f"{image_id}.jpg"
         if candidate.exists():
             return candidate.resolve()
-    # Fall back to a flat layout (all images directly under ham_root).
     flat = ham_root / f"{image_id}.jpg"
-    if flat.exists():
-        return flat.resolve()
-    return None
-
-
-def _lesion_id(row):
-    """Lesion-level grouping key.
-
-    HAM10000 metadata ships a ``lesion_id`` column (e.g. ``HAM_0000118``) that
-    groups duplicate images of the same lesion — the correct key to split on.
-    If absent, fall back to the image_id prefix before the last underscore.
-    """
-    if "lesion_id" in row and pd.notna(row["lesion_id"]):
-        return str(row["lesion_id"])
-    stem = str(row["image_id"])
-    head, _, tail = stem.rpartition("_")
-    return head if head else stem
+    return flat.resolve() if flat.exists() else None
 
 
 def build_ham10000_dataframe(cfg):
-    """Build the HAM10000 manifest DataFrame from its metadata CSV."""
-    ham_root = Path(cfg["data"]["ham10000_path"])
-    metadata_path = ham_root / METADATA_FILE
+    """HAM10000 -> 11-class rows (fitzpatrick_type = -1, no skin-type labels)."""
+    ham_root = Path(cfg["data"]["ham10000_path"]) if cfg["data"].get(
+        "ham10000_path"
+    ) else None
+    if ham_root is None:
+        return pd.DataFrame()
+    metadata_path = ham_root / HAM_METADATA_FILE
     if not metadata_path.exists():
-        raise FileNotFoundError(
-            f"HAM10000 metadata not found at {metadata_path}. "
-            f"Run scripts/01_download_data.sh first."
-        )
+        logger.warning("HAM10000 metadata not found at %s — skipping HAM10000.",
+                       metadata_path)
+        return pd.DataFrame()
 
     meta = pd.read_csv(metadata_path)
-    logger.info("Read %d rows from %s", len(meta), metadata_path)
-
     rows = []
-    missing_images = 0
-    unknown_dx = 0
+    missing = 0
     for _, row in meta.iterrows():
         dx = str(row["dx"]).strip().lower()
         if dx not in HAM10000_7CLASS_MAP:
-            unknown_dx += 1
             continue
-        class_name = HAM10000_7CLASS_MAP[dx]
-        label_idx = CLASS_TO_IDX_7[class_name]
-
-        image_path = _find_image(ham_root, str(row["image_id"]))
+        label_idx = CLASS_TO_IDX_11[HAM10000_7CLASS_MAP[dx]]
+        image_path = _find_ham_image(ham_root, str(row["image_id"]))
         if image_path is None:
-            missing_images += 1
+            missing += 1
             continue
-
+        # Lesion-level grouping (metadata ships a lesion_id column).
+        lesion = (
+            str(row["lesion_id"])
+            if "lesion_id" in row and pd.notna(row["lesion_id"])
+            else str(row["image_id"]).rpartition("_")[0] or str(row["image_id"])
+        )
         rows.append(
             {
                 "image_path": str(image_path),
                 "label_idx": label_idx,
-                "fitzpatrick_type": -1,  # HAM10000 has no Fitzpatrick labels
+                "fitzpatrick_type": -1,
                 "source": "ham10000",
                 "is_synthetic": False,
-                "group": _lesion_id(row),
+                "group": f"ham10000:{lesion}",
             }
         )
+    if missing:
+        logger.warning("HAM10000: %d images missing on disk", missing)
+    logger.info("HAM10000: %d images", len(rows))
+    return pd.DataFrame(rows)
 
-    if missing_images:
-        logger.warning("%d images referenced in metadata were not found on disk",
-                       missing_images)
+
+def build_passion_dataframe(cfg):
+    """PASSION -> 11-class rows with real Fitzpatrick labels, grouped by patient."""
+    passion_root = Path(cfg["data"]["passion_path"]) if cfg["data"].get(
+        "passion_path"
+    ) else None
+    if passion_root is None:
+        return pd.DataFrame()
+    metadata_path = passion_root / PASSION_METADATA_FILE
+    image_dir = passion_root / PASSION_IMAGE_DIR
+    if not metadata_path.exists():
+        logger.warning("PASSION metadata not found at %s — skipping PASSION.",
+                       metadata_path)
+        return pd.DataFrame()
+
+    meta = pd.read_csv(metadata_path).set_index("subject_id")
+    rows = []
+    unmatched = 0
+    unknown_dx = 0
+    for image_path in sorted(image_dir.glob("*.jpg")):
+        subject = image_path.stem.rpartition("_")[0] or image_path.stem
+        if subject not in meta.index:
+            unmatched += 1
+            continue
+        record = meta.loc[subject]
+        diagnosis = str(record["conditions_PASSION"]).strip().lower()
+        if diagnosis not in PASSION_MAP:
+            unknown_dx += 1
+            continue
+        label_idx = CLASS_TO_IDX_11[PASSION_MAP[diagnosis]]
+        rows.append(
+            {
+                "image_path": str(image_path.resolve()),
+                "label_idx": label_idx,
+                "fitzpatrick_type": int(record["fitzpatrick"]),
+                "source": "passion",
+                "is_synthetic": False,
+                "group": f"passion:{subject}",  # patient-level grouping
+            }
+        )
+    if unmatched:
+        logger.warning("PASSION: %d images had no metadata row", unmatched)
     if unknown_dx:
-        logger.warning("%d rows had an unrecognised dx code and were skipped",
-                       unknown_dx)
-
+        logger.warning("PASSION: %d images had an unmapped diagnosis", unknown_dx)
+    logger.info("PASSION: %d images", len(rows))
     return pd.DataFrame(rows)
 
 
 def split_dataframe(df, splits, seed=42):
-    """Lesion-level 80/10/10 split grouped by the ``group`` column."""
+    """Group-aware 80/10/10 split (no group spans two splits)."""
     groups = df["group"].values
-
     gss_test = GroupShuffleSplit(
         n_splits=1, test_size=splits["test"], random_state=seed
     )
@@ -140,42 +177,55 @@ def split_dataframe(df, splits, seed=42):
     train_idx, val_idx = next(
         gss_val.split(trainval, groups=trainval["group"].values)
     )
-    train = trainval.iloc[train_idx].reset_index(drop=True)
-    val = trainval.iloc[val_idx].reset_index(drop=True)
+    return {
+        "train": trainval.iloc[train_idx].reset_index(drop=True),
+        "val": trainval.iloc[val_idx].reset_index(drop=True),
+        "test": test,
+    }
 
-    return {"train": train, "val": val, "test": test}
 
-
-def report_statistics(df, class_names):
-    """Print total images, per-class counts/percentages and imbalance warnings."""
+def report_statistics(df, splits, class_names, dark_types):
+    """Print merged dataset statistics and GAN-candidate flags."""
     total = len(df)
-    logger.info("=" * 60)
-    logger.info("Total HAM10000 images: %d", total)
-    logger.info("Per-class distribution:")
-    counts = df["label_idx"].value_counts().sort_index()
-    for idx in range(len(class_names)):
-        count = int(counts.get(idx, 0))
-        pct = (count / total * 100) if total else 0.0
-        flag = "  <-- under 5%" if total and pct < 5.0 else ""
-        logger.info("  %2d %-22s %5d (%5.1f%%)%s",
-                    idx, class_names[idx], count, pct, flag)
+    logger.info("=" * 64)
+    logger.info("Merged dataset: %d images", total)
 
-    underrepresented = [
-        class_names[idx]
-        for idx in range(len(class_names))
-        if total and (int(counts.get(idx, 0)) / total * 100) < 5.0
-    ]
-    if underrepresented:
-        logger.warning(
-            "Class imbalance: %s under 5%% of the dataset. Consider class "
-            "weighting or resampling.",
-            ", ".join(underrepresented),
-        )
+    logger.info("Images by source:")
+    for source, count in df["source"].value_counts().items():
+        logger.info("  %-10s %d", source, count)
+
+    logger.info("Per-class counts (merged):")
+    counts = df["label_idx"].value_counts()
+    gan_candidates = []
+    for idx in range(len(class_names)):
+        c = int(counts.get(idx, 0))
+        flag = ""
+        if c < GAN_TARGET_THRESHOLD:
+            flag = "  <-- underrepresented (GAN candidate)"
+            gan_candidates.append(class_names[idx])
+        logger.info("  %2d %-22s %5d%s", idx, class_names[idx], c, flag)
+
+    logger.info("Fitzpatrick type distribution:")
+    for ft, c in df["fitzpatrick_type"].value_counts().sort_index().items():
+        tag = "  (dark skin)" if ft in dark_types else ""
+        label = "unlabelled" if ft == -1 else f"type {ft}"
+        logger.info("  %-12s %5d%s", label, int(c), tag)
+
+    dark = df[df["fitzpatrick_type"].isin(dark_types)]
+    logger.info("Dark-skin (IV-VI) images total: %d", len(dark))
+    logger.info("Dark-skin (IV-VI) per split:")
+    for name, sdf in splits.items():
+        d = sdf[sdf["fitzpatrick_type"].isin(dark_types)]
+        logger.info("  %-5s %d", name, len(d))
+
+    if gan_candidates:
+        logger.warning("GAN synthesis candidates (<%d images): %s",
+                       GAN_TARGET_THRESHOLD, ", ".join(gan_candidates))
 
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Preprocess HAM10000 into 7-class manifests."
+        description="Preprocess HAM10000 + PASSION into 11-class manifests."
     )
     parser.add_argument("--config", default="config.yaml", help="Path to config.")
     args = parser.parse_args()
@@ -184,26 +234,29 @@ def main():
     set_seed()
 
     class_names = cfg["data"]["class_names"]
+    dark_types = cfg["data"]["fitzpatrick_dark_types"]
     processed_root = Path(cfg["data"]["processed_path"])
 
-    df = build_ham10000_dataframe(cfg)
-    if df.empty:
-        raise RuntimeError("No HAM10000 images were resolved; check the data path.")
+    frames = [build_ham10000_dataframe(cfg), build_passion_dataframe(cfg)]
+    frames = [f for f in frames if not f.empty]
+    if not frames:
+        raise RuntimeError(
+            "No data found for any source. Check ham10000_path / passion_path."
+        )
+    merged = pd.concat(frames, ignore_index=True)
 
-    report_statistics(df, class_names)
+    splits = split_dataframe(merged, cfg["data"]["splits"])
+    report_statistics(merged, splits, class_names, dark_types)
 
-    splits = split_dataframe(df, cfg["data"]["splits"])
-
-    logger.info("=" * 60)
+    logger.info("=" * 64)
     for split_name, split_df in splits.items():
         out_dir = processed_root / split_name
         out_dir.mkdir(parents=True, exist_ok=True)
-        out_df = split_df[MANIFEST_COLUMNS]
-        out_df.to_csv(out_dir / "manifest.csv", index=False)
-        logger.info("%-5s split: %d images (%d lesions)",
+        split_df[MANIFEST_COLUMNS].to_csv(out_dir / "manifest.csv", index=False)
+        logger.info("%-5s split: %d images (%d groups)",
                     split_name, len(split_df), split_df["group"].nunique())
 
-    logger.info("Preprocessing complete (HAM10000, 7 classes).")
+    logger.info("Preprocessing complete (HAM10000 + PASSION, 11 classes).")
 
 
 if __name__ == "__main__":

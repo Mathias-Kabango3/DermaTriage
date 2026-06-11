@@ -4,6 +4,7 @@ from . import bias_audit, dvs, fitzpatrick_eval, metrics
 from .bias_audit import run_bias_audit
 from .dvs import DVSInput, compute_dvs, compute_equity_score
 from .fitzpatrick_eval import (
+    evaluate_by_source,
     evaluate_fitzpatrick_stratified,
     plot_fitzpatrick_accuracy,
 )
@@ -23,6 +24,7 @@ __all__ = [
     "DVSInput",
     "compute_dvs",
     "compute_equity_score",
+    "evaluate_by_source",
     "evaluate_fitzpatrick_stratified",
     "plot_fitzpatrick_accuracy",
     "compute_confusion_matrix",

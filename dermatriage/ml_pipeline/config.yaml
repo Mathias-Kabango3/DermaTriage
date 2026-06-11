@@ -1,4 +1,4 @@
-# HAM10000-only config — extend to 12 classes when Fitzpatrick17k is available
+# HAM10000 + PASSION config — extend further when Fitzpatrick17k is available
 # ============================================================================
 # DermaTriage — ML Pipeline Configuration
 # Skin disease triage: teacher training, GAN augmentation, KD, quantisation.
@@ -11,26 +11,30 @@
 data:
   fitzpatrick17k_path: null
   ham10000_path: data/raw/ham10000
+  passion_path: data/raw/passion
   synthetic_path: data/synthetic
   processed_path: data/processed
   image_size: 224
-  num_classes: 7
+  num_classes: 11
   splits:
     train: 0.80
     val: 0.10
     test: 0.10
-  # HAM10000 classes, ordered to match the HAM10000 label codes (mel, nv, bcc,
-  # akiec, bkl, df, vasc).
+  # Merged HAM10000 (7, indices 0-6) + PASSION (4, indices 7-10) union schema.
   class_names:
-    - melanoma           # mel
-    - melanocytic_nevus  # nv
-    - basal_cell_carcinoma  # bcc
-    - actinic_keratosis  # akiec
-    - benign_keratosis   # bkl
-    - dermatofibroma     # df
-    - vascular_lesion    # vasc
-  # No Fitzpatrick labels in HAM10000 — GAN augmentation deferred until Fitzpatrick17k arrives
-  fitzpatrick_dark_types: []
+    - melanoma              # 0  HAM mel
+    - melanocytic_nevus     # 1  HAM nv
+    - basal_cell_carcinoma  # 2  HAM bcc
+    - actinic_keratosis     # 3  HAM akiec
+    - benign_keratosis      # 4  HAM bkl
+    - dermatofibroma        # 5  HAM df
+    - vascular_lesion       # 6  HAM vasc
+    - tinea_infection       # 7  PASSION Fungal
+    - scabies               # 8  PASSION Scabies
+    - eczema_dermatitis     # 9  PASSION Eczema
+    - other_ntd             # 10 PASSION Others
+  # PASSION provides real Fitzpatrick labels; types 4-6 are the dark-skin focus.
+  fitzpatrick_dark_types: [4, 5, 6]
 
 # ----------------------------------------------------------------------------
 # Teacher model (high-capacity, trained on real + synthetic data)

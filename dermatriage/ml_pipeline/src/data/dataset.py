@@ -65,4 +65,5 @@ class SkinDataset(Dataset):
             "label": int(row["label_idx"]),
             "fitzpatrick": int(row["fitzpatrick_type"]),
             "is_synthetic": bool(row["is_synthetic"]),
+            "source": str(row["source"]) if "source" in row else "unknown",
         }

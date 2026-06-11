@@ -165,11 +165,82 @@ TRIAGE_LEVEL_7 = {
     "vascular_lesion": MONITOR,
 }
 
+# ----------------------------------------------------------------------------
+# PASSION dataset (Gottfrois et al., MICCAI 2024) — inspection of label.csv
+#
+# Inspected: dermatriage/PASSION_MICCAI_2024/label.csv
+#   - Patient-level: 1653 rows (one per subject), 4901 images on disk.
+#   - Images: flat dir images/{subject_id}_{n}.jpg (multiple per patient).
+#   - Columns: subject_id, country, age, sex, fitzpatrick, body_loc, impetig,
+#              conditions_PASSION
+#
+#   Diagnosis column = conditions_PASSION (4 classes):
+#       Fungal   579
+#       Scabies  471
+#       Eczema   414
+#       Others   189
+#   Separate binary flag = impetig (0/1): 191 positive. Impetigo is a
+#   co-occurring bacterial infection flag, NOT a primary diagnosis label, so it
+#   is not mapped as its own class here.
+#
+#   Skin type column = fitzpatrick. NOTE: the dataset is documented as
+#   "IV-VI only" but actually contains:
+#       type 1:   1
+#       type 3: 354
+#       type 4: 486
+#       type 5: 428
+#       type 6: 384
+#   We keep the real values; GAN/equity work focuses on types 4-6.
+#
+#   Countries: Madagascar 985, Guinea 384, Malawi 261, Tanzania 23.
+#   Age range: 0-97 (paediatric-focused, some adults).
+#
+# All 4 PASSION conditions are infectious/inflammatory and do not overlap the
+# HAM10000 cancer/lesion classes, so they are added as new classes (union
+# schema) rather than collapsed.
+# ----------------------------------------------------------------------------
+PASSION_MAP = {
+    # Superficial fungal / dermatophyte infection — clinically "tinea".
+    "fungal": "tinea_infection",
+    # Direct match.
+    "scabies": "scabies",
+    # Atopic / contact dermatitis presents as eczema.
+    "eczema": "eczema_dermatitis",
+    # Heterogeneous catch-all for unclassified conditions -> NTD/other bucket.
+    "others": "other_ntd",
+}
+
+# ----------------------------------------------------------------------------
+# Merged HAM10000 (7) + PASSION (4) union taxonomy — 11 classes.
+# Indices 0-6 are identical to the HAM10000 7-class set; 7-10 are the PASSION
+# infectious/inflammatory additions.
+# ----------------------------------------------------------------------------
+MERGED_11CLASSES = HAM10000_7CLASSES + [
+    "tinea_infection",
+    "scabies",
+    "eczema_dermatitis",
+    "other_ntd",
+]
+
+CLASS_TO_IDX_11 = {name: idx for idx, name in enumerate(MERGED_11CLASSES)}
+
+TRIAGE_LEVEL_11 = {
+    **TRIAGE_LEVEL_7,
+    "tinea_infection": TREAT_LOCALLY,
+    "scabies": TREAT_LOCALLY,
+    "eczema_dermatitis": MONITOR,
+    "other_ntd": URGENT_REFERRAL,
+}
+
 # Registry of source -> (label_map, class_to_idx, triage_level).
 _SOURCE_REGISTRY = {
     "fitzpatrick17k": (FITZPATRICK17K_MAP, CLASS_TO_IDX, TRIAGE_LEVEL),
     "ham10000": (HAM10000_MAP, CLASS_TO_IDX, TRIAGE_LEVEL),
     "ham10000_7class": (HAM10000_7CLASS_MAP, CLASS_TO_IDX_7, TRIAGE_LEVEL_7),
+    # Merged 11-class union: HAM10000 keeps its native 7 codes, mapped into the
+    # 11-class index space (indices 0-6 unchanged).
+    "ham10000_11class": (HAM10000_7CLASS_MAP, CLASS_TO_IDX_11, TRIAGE_LEVEL_11),
+    "passion": (PASSION_MAP, CLASS_TO_IDX_11, TRIAGE_LEVEL_11),
 }
 
 
@@ -178,8 +249,9 @@ def harmonise_label(raw_label, source):
 
     Args:
         raw_label: The raw label string from the source dataset.
-        source: One of ``"fitzpatrick17k"``, ``"ham10000"`` (both 12-class) or
-            ``"ham10000_7class"`` (the HAM10000-only 7-class taxonomy).
+        source: One of ``"fitzpatrick17k"`` / ``"ham10000"`` (12-class),
+            ``"ham10000_7class"`` (HAM10000-only 7-class), or the merged
+            11-class union sources ``"ham10000_11class"`` and ``"passion"``.
 
     Returns:
         tuple: ``(harmonised_id, class_idx, triage_level)``.

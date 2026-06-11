@@ -54,17 +54,58 @@ def evaluate_fitzpatrick_stratified(model, loader, device):
     return accuracies
 
 
-def plot_fitzpatrick_accuracy(accuracies, output_path):
-    """Bar chart of accuracy across Fitzpatrick types, saved as PNG."""
+@torch.no_grad()
+def evaluate_by_source(model, loader, device):
+    """Accuracy broken down by dataset source (e.g. ham10000 vs passion).
+
+    Surfaces whether the model performs differently across datasets, which can
+    reveal distribution shift between the cancer-focused HAM10000 images and the
+    tropical/dark-skin PASSION images.
+
+    Returns:
+        dict: ``{source: accuracy}`` sorted by source name.
+    """
+    model.eval()
+    correct = {}
+    total = {}
+
+    for batch in loader:
+        images = batch["image"].to(device, non_blocking=True)
+        labels = batch["label"].to(device, non_blocking=True)
+        sources = batch.get("source", ["unknown"] * labels.size(0))
+
+        preds = model(images).argmax(dim=1)
+        hit = (preds == labels).cpu()
+        for src, is_correct in zip(list(sources), hit.tolist()):
+            total[src] = total.get(src, 0) + 1
+            correct[src] = correct.get(src, 0) + int(is_correct)
+
+    accuracies = {s: correct[s] / total[s] for s in sorted(total)}
+    logger.info("Accuracy by source: %s",
+                {k: round(v, 4) for k, v in accuracies.items()})
+    return accuracies
+
+
+def plot_fitzpatrick_accuracy(accuracies, output_path, dark_types=(4, 5, 6)):
+    """Bar chart of accuracy across all Fitzpatrick types present.
+
+    Dark skin types (``dark_types``, default IV-VI) are drawn in a distinct
+    colour to highlight the equity-critical groups.
+    """
     output_path = Path(output_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    if not accuracies:
+        logger.warning("No Fitzpatrick accuracies to plot; skipping chart.")
+        return
 
     types = sorted(accuracies)
     values = [accuracies[t] for t in types]
     labels = [f"Type {t}" for t in types]
+    colors = ["#C44E52" if t in dark_types else "#4C72B0" for t in types]
 
-    fig, ax = plt.subplots(figsize=(6, 4))
-    bars = ax.bar(labels, values, color="#4C72B0")
+    fig, ax = plt.subplots(figsize=(7, 4))
+    bars = ax.bar(labels, values, color=colors)
     ax.set_ylim(0, 1)
     ax.set_ylabel("Accuracy")
     ax.set_title("Accuracy by Fitzpatrick Skin Type")
@@ -73,6 +114,15 @@ def plot_fitzpatrick_accuracy(accuracies, output_path):
             bar.get_x() + bar.get_width() / 2, val + 0.01,
             f"{val:.3f}", ha="center", va="bottom", fontsize=9,
         )
+    # Legend explaining the dark-skin highlight.
+    from matplotlib.patches import Patch
+    ax.legend(
+        handles=[
+            Patch(color="#4C72B0", label="Type I-III"),
+            Patch(color="#C44E52", label=f"Type {'/'.join(map(str, dark_types))} (dark)"),
+        ],
+        loc="lower right", fontsize=8,
+    )
     fig.tight_layout()
     fig.savefig(output_path, dpi=150)
     plt.close(fig)

@@ -136,10 +136,20 @@ def main():
     teacher_cfg = cfg["teacher"]
     epochs = teacher_cfg["epochs"]
     freeze_epochs = teacher_cfg.get("freeze_epochs", DEFAULT_FREEZE_EPOCHS)
+
+    # --- Data ---
+    train_loader, val_loader, test_loader = build_dataloaders(
+        cfg, batch_size=teacher_cfg["batch_size"]
+    )
+    n_images = (
+        len(train_loader.dataset)
+        + len(val_loader.dataset)
+        + len(test_loader.dataset)
+    )
     logger.info(
-        "Training on HAM10000 only (%d classes). Fitzpatrick-stratified "
-        "metrics disabled until Fitzpatrick17k is available.",
-        cfg["data"]["num_classes"],
+        "Training on HAM10000 + PASSION (%d images, %d classes). "
+        "Fitzpatrick-stratified evaluation enabled for types IV-VI from PASSION.",
+        n_images, cfg["data"]["num_classes"],
     )
     logger.info("Training teacher on %s for %d epochs", device, epochs)
 
@@ -147,13 +157,7 @@ def main():
     if not args.no_wandb:
         run = init_wandb(cfg, job_type="train_teacher")
         if run is not None:
-            # Label the run so HAM10000-only results are clearly distinguished.
-            run.name = f"teacher_ham10000_only_{run.id}"
-
-    # --- Data ---
-    train_loader, val_loader, _ = build_dataloaders(
-        cfg, batch_size=teacher_cfg["batch_size"]
-    )
+            run.name = "ham10000_passion_teacher"
 
     # --- Model ---
     model = build_teacher(
