@@ -1,0 +1,18 @@
+{
+  "experiment": "E2",
+  "model": "MobileNetV3-Small",
+  "pretrained_on": "ImageNet",
+  "trained_on": "PASSION only",
+  "evaluated_on": "PASSION test set",
+  "num_classes": 4,
+  "best_val_accuracy": 0.6776,
+  "test_accuracy": 0.7366,
+  "fitzpatrick_accuracies": {
+    "3": 0.719,
+    "4": 0.7536,
+    "5": 0.7478,
+    "6": 0.7143
+  },
+  "dark_skin_disparity": 0.0393,
+  "notes": "Overfitting observed \u2014 train acc ~93% vs val acc ~68%. Consistent with limited dataset size (~3,900 training images)."
+}
