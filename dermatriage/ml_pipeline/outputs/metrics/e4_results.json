@@ -1,0 +1,18 @@
+{
+  "experiment": "E4",
+  "model": "MobileNetV3-Small",
+  "pretrained_on": "ImageNet",
+  "trained_on": "ISIC 2019 + PASSION combined (11 unified classes)",
+  "evaluated_on": "PASSION test set",
+  "num_classes": 11,
+  "best_val_accuracy": 0.8166,
+  "test_accuracy": 0.7418,
+  "fitzpatrick_accuracies": {
+    "3": 0.7358,
+    "4": 0.681,
+    "5": 0.819,
+    "6": 0.7297
+  },
+  "dark_skin_disparity": 0.138,
+  "notes": "Combined ISIC + PASSION with unified 11-class schema. Others (PASSION) and UNK (ISIC) dropped from training."
+}
