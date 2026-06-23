@@ -161,20 +161,6 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
             ),
-            // Footer.
-            Container(
-              width: double.infinity,
-              color: AppColors.surface,
-              padding: const EdgeInsets.symmetric(vertical: 10),
-              child: Text(
-                'Research Prototype — ALU Capstone 2026',
-                textAlign: TextAlign.center,
-                style: Theme.of(context)
-                    .textTheme
-                    .bodySmall
-                    ?.copyWith(color: AppColors.textSecondary),
-              ),
-            ),
           ],
         ),
       ),
