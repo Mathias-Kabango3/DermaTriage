@@ -1,15 +1,43 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/colors.dart';
+import '../../providers/auth_provider.dart';
 
 /// Landing screen: branding and primary actions.
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
+  Future<void> _confirmLogout(BuildContext context) async {
+    final bool? confirmed = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext ctx) => AlertDialog(
+        title: const Text('Log out?'),
+        content: const Text('You will need to sign in again to continue.'),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Log out'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) {
+      // Router redirect returns to /login once the session clears.
+      AuthProvider.instance.logout();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final String? username =
+        context.watch<AuthProvider>().currentUsername;
     return Scaffold(
       appBar: AppBar(
         title: const Text(AppConstants.appName),
@@ -18,6 +46,57 @@ class HomeScreen extends StatelessWidget {
             icon: const Icon(Icons.history),
             tooltip: 'History',
             onPressed: () => context.push('/history'),
+          ),
+          PopupMenuButton<String>(
+            tooltip: 'Account',
+            icon: const Icon(Icons.account_circle),
+            onSelected: (String value) {
+              switch (value) {
+                case 'settings':
+                  context.push('/settings');
+                  break;
+                case 'change_password':
+                  context.push('/change-password');
+                  break;
+                case 'logout':
+                  _confirmLogout(context);
+                  break;
+              }
+            },
+            itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+              if (username != null)
+                PopupMenuItem<String>(
+                  enabled: false,
+                  child: Text(
+                    'Signed in as $username',
+                    style: const TextStyle(color: AppColors.textSecondary),
+                  ),
+                ),
+              const PopupMenuItem<String>(
+                value: 'settings',
+                child: ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: Icon(Icons.settings),
+                  title: Text('Settings'),
+                ),
+              ),
+              const PopupMenuItem<String>(
+                value: 'change_password',
+                child: ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: Icon(Icons.lock_reset),
+                  title: Text('Change password'),
+                ),
+              ),
+              const PopupMenuItem<String>(
+                value: 'logout',
+                child: ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: Icon(Icons.logout),
+                  title: Text('Log out'),
+                ),
+              ),
+            ],
           ),
         ],
       ),

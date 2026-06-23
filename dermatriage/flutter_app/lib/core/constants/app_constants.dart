@@ -15,7 +15,22 @@ class AppConstants {
 
   // Local database
   static const String databaseName = 'dermatriage.db';
-  static const int databaseVersion = 1;
+  // v2 adds the offline `users` table for CHW authentication.
+  static const int databaseVersion = 2;
+
+  // Offline authentication
+  /// Minimum length for CHW account passwords.
+  static const int minPasswordLength = 6;
+
+  /// Preset security questions offered during registration. Used as the
+  /// offline "forgot password" recovery mechanism (no email/server).
+  static const List<String> securityQuestions = <String>[
+    'What town were you born in?',
+    "What is your mother's first name?",
+    'What was the name of your first school?',
+    'What is the name of your first pet?',
+    'What is your favourite food?',
+  ];
 
   /// Short disclaimer for the persistent banner (see [ethicsDisclaimer] for
   /// the full text shown on first launch).

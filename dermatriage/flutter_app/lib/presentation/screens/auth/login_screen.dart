@@ -1,0 +1,176 @@
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../../core/constants/app_constants.dart';
+import '../../../core/theme/colors.dart';
+import '../../providers/auth_provider.dart';
+
+/// Sign-in gate shown before any triage features are accessible.
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final _usernameController = TextEditingController();
+  final _passwordController = TextEditingController();
+
+  bool _obscurePassword = true;
+  bool _submitting = false;
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _onLogin() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _submitting = true);
+    final bool ok = await AuthProvider.instance.login(
+      _usernameController.text,
+      _passwordController.text,
+    );
+    if (!mounted) return;
+    setState(() => _submitting = false);
+
+    if (ok) {
+      // Router redirect takes over once the session updates; navigate
+      // explicitly as well so the home screen shows immediately.
+      context.go('/');
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Incorrect username or password.')),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  const SizedBox(height: 16),
+                  Container(
+                    width: 96,
+                    height: 96,
+                    decoration: const BoxDecoration(
+                      color: AppColors.primaryLight,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.health_and_safety,
+                      size: 52,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    AppConstants.appName,
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Sign in to continue',
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodyMedium
+                        ?.copyWith(color: AppColors.textSecondary),
+                  ),
+                  const SizedBox(height: 32),
+                  TextFormField(
+                    controller: _usernameController,
+                    textInputAction: TextInputAction.next,
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: 'Username',
+                      prefixIcon: Icon(Icons.person_outline),
+                    ),
+                    validator: (String? v) => (v == null || v.trim().isEmpty)
+                        ? 'Please enter your username'
+                        : null,
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _passwordController,
+                    obscureText: _obscurePassword,
+                    decoration: InputDecoration(
+                      border: const OutlineInputBorder(),
+                      labelText: 'Password',
+                      prefixIcon: const Icon(Icons.lock_outline),
+                      suffixIcon: IconButton(
+                        icon: Icon(_obscurePassword
+                            ? Icons.visibility_off
+                            : Icons.visibility),
+                        onPressed: () => setState(
+                            () => _obscurePassword = !_obscurePassword),
+                      ),
+                    ),
+                    validator: (String? v) => (v == null || v.isEmpty)
+                        ? 'Please enter your password'
+                        : null,
+                  ),
+                  const SizedBox(height: 8),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () => context.push('/forgot-password'),
+                      child: const Text('Forgot password?'),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  ElevatedButton.icon(
+                    icon: _submitting
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Icon(Icons.login),
+                    label: Text(_submitting ? 'Signing in...' : 'Log In'),
+                    onPressed: _submitting ? null : _onLogin,
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Text(
+                        'New health worker?',
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodyMedium
+                            ?.copyWith(color: AppColors.textSecondary),
+                      ),
+                      TextButton(
+                        onPressed: () => context.push('/register'),
+                        child: const Text('Register'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

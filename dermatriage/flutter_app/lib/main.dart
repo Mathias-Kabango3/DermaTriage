@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'core/constants/app_constants.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
+import 'presentation/providers/auth_provider.dart';
 import 'presentation/providers/history_provider.dart';
 import 'presentation/providers/patient_provider.dart';
 import 'presentation/providers/triage_provider.dart';
@@ -21,6 +22,10 @@ class DermaTriage extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        // Shared auth session — same instance the router guard observes.
+        ChangeNotifierProvider<AuthProvider>.value(
+          value: AuthProvider.instance,
+        ),
         ChangeNotifierProvider<TriageProvider>(
           create: (_) => TriageProvider()..init(),
         ),

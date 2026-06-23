@@ -1,6 +1,11 @@
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../presentation/providers/auth_provider.dart';
+import '../../presentation/screens/auth/change_password_screen.dart';
+import '../../presentation/screens/auth/forgot_password_screen.dart';
+import '../../presentation/screens/auth/login_screen.dart';
+import '../../presentation/screens/auth/register_screen.dart';
 import '../../presentation/screens/camera/camera_screen.dart';
 import '../../presentation/screens/history/history_screen.dart';
 import '../../presentation/screens/home/home_screen.dart';
@@ -12,11 +17,52 @@ import '../../presentation/screens/settings/settings_screen.dart';
 /// above the router's page navigator.
 final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
 
+/// Routes reachable without an active session (the authentication gate).
+const Set<String> _publicRoutes = <String>{
+  '/login',
+  '/register',
+  '/forgot-password',
+};
+
 /// Application route table.
+///
+/// A [GoRouter.redirect] guard gates the triage features behind login: an
+/// unauthenticated CHW is sent to `/login`, and an authenticated one is kept
+/// out of the auth screens. The router refreshes whenever the shared
+/// [AuthProvider] session changes.
 final GoRouter appRouter = GoRouter(
   navigatorKey: rootNavigatorKey,
   initialLocation: '/',
+  refreshListenable: AuthProvider.instance,
+  redirect: (BuildContext context, GoRouterState state) {
+    final bool loggedIn = AuthProvider.instance.isLoggedIn;
+    final bool goingToPublic = _publicRoutes.contains(state.matchedLocation);
+
+    if (!loggedIn && !goingToPublic) return '/login';
+    if (loggedIn && goingToPublic) return '/';
+    return null;
+  },
   routes: <RouteBase>[
+    GoRoute(
+      path: '/login',
+      name: 'login',
+      builder: (context, state) => const LoginScreen(),
+    ),
+    GoRoute(
+      path: '/register',
+      name: 'register',
+      builder: (context, state) => const RegisterScreen(),
+    ),
+    GoRoute(
+      path: '/forgot-password',
+      name: 'forgotPassword',
+      builder: (context, state) => const ForgotPasswordScreen(),
+    ),
+    GoRoute(
+      path: '/change-password',
+      name: 'changePassword',
+      builder: (context, state) => const ChangePasswordScreen(),
+    ),
     GoRoute(
       path: '/',
       name: 'home',

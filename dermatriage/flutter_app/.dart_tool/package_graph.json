@@ -7,6 +7,7 @@
       "name": "dermatriage",
       "version": "1.0.0+1",
       "dependencies": [
+        "bcrypt",
         "camera",
         "cupertino_icons",
         "flutter",
@@ -96,6 +97,11 @@
         "logging",
         "meta"
       ]
+    },
+    {
+      "name": "bcrypt",
+      "version": "1.2.0",
+      "dependencies": []
     },
     {
       "name": "shared_preferences",

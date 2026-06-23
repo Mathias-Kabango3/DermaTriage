@@ -18,6 +18,7 @@ class DatabaseHelper {
   static const String tableDiseaseClass = 'disease_classes';
   static const String tableEncounter = 'encounters';
   static const String tableModelEvaluation = 'model_evaluations';
+  static const String tableUser = 'users';
 
   Database? _db;
 
@@ -38,7 +39,16 @@ class DatabaseHelper {
         await db.execute('PRAGMA foreign_keys = ON');
       },
       onCreate: _onCreate,
+      onUpgrade: _onUpgrade,
     );
+  }
+
+  /// Applies incremental schema migrations for existing installs.
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    // v2: offline CHW authentication.
+    if (oldVersion < 2) {
+      await _createUserTable(db);
+    }
   }
 
   Future<void> _onCreate(Database db, int version) async {
@@ -96,7 +106,26 @@ class DatabaseHelper {
       )
     ''');
 
+    await _createUserTable(db);
+
     await _seedDiseaseClasses(db);
+  }
+
+  /// Creates the `users` table for offline CHW authentication.
+  ///
+  /// Passwords and security answers are stored only as bcrypt hashes — the
+  /// raw values are never persisted.
+  Future<void> _createUserTable(Database db) async {
+    await db.execute('''
+      CREATE TABLE $tableUser (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT NOT NULL UNIQUE,
+        password_hash TEXT NOT NULL,
+        security_question TEXT NOT NULL,
+        security_answer_hash TEXT NOT NULL,
+        created_at TEXT NOT NULL
+      )
+    ''');
   }
 
   /// Populate the disease_classes reference table from the app constants.
@@ -125,15 +154,16 @@ class DatabaseHelper {
     }
   }
 
-  /// Delete all patient/encounter/evaluation data and recreate the schema.
+  /// Delete all patient/encounter/evaluation data. Used by the "Reset All
+  /// Data" action in settings.
   ///
-  /// The disease_classes reference table is re-seeded. Used by the
-  /// "Reset All Data" action in settings.
+  /// Clears patient-facing rows only. The `disease_classes` reference table
+  /// and — importantly — registered CHW [tableUser] accounts are preserved,
+  /// so resetting data does not lock the health worker out of the app.
   Future<void> resetDatabase() async {
-    final String dbPath = await getDatabasesPath();
-    final String path = p.join(dbPath, AppConstants.databaseName);
-    await close();
-    await deleteDatabase(path);
-    _db = await _initDb(); // triggers _onCreate (+ reseed) on the fresh file
+    final Database db = await database;
+    await db.delete(tableEncounter);
+    await db.delete(tablePatient);
+    await db.delete(tableModelEvaluation);
   }
 }
