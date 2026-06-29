@@ -37,7 +37,7 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final String? username =
-        context.watch<AuthProvider>().currentUsername;
+        context.watch<AuthProvider>().displayName;
     return Scaffold(
       appBar: AppBar(
         title: const Text(AppConstants.appName),
@@ -55,8 +55,8 @@ class HomeScreen extends StatelessWidget {
                 case 'settings':
                   context.push('/settings');
                   break;
-                case 'change_password':
-                  context.push('/change-password');
+                case 'profile':
+                  context.push('/profile');
                   break;
                 case 'logout':
                   _confirmLogout(context);
@@ -81,11 +81,11 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
               const PopupMenuItem<String>(
-                value: 'change_password',
+                value: 'profile',
                 child: ListTile(
                   contentPadding: EdgeInsets.zero,
-                  leading: Icon(Icons.lock_reset),
-                  title: Text('Change password'),
+                  leading: Icon(Icons.person_outline),
+                  title: Text('My profile'),
                 ),
               ),
               const PopupMenuItem<String>(

@@ -6,6 +6,10 @@ import '../../../core/theme/colors.dart';
 import '../../providers/auth_provider.dart';
 
 /// Account creation for a new community health worker.
+///
+/// Registration is online — it needs internet the first time so the account is
+/// created in Firebase (and the project owner can see registered CHWs). After
+/// that the session is cached and triage works offline.
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
 
@@ -15,39 +19,37 @@ class RegisterScreen extends StatefulWidget {
 
 class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _usernameController = TextEditingController();
+  final _nameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _regionController = TextEditingController();
+  final _facilityController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmController = TextEditingController();
-  final _answerController = TextEditingController();
 
-  String? _securityQuestion;
   bool _obscurePassword = true;
   bool _submitting = false;
 
   @override
   void dispose() {
-    _usernameController.dispose();
+    _nameController.dispose();
+    _emailController.dispose();
+    _regionController.dispose();
+    _facilityController.dispose();
     _passwordController.dispose();
     _confirmController.dispose();
-    _answerController.dispose();
     super.dispose();
   }
 
   Future<void> _onRegister() async {
     if (!_formKey.currentState!.validate()) return;
-    if (_securityQuestion == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please choose a security question.')),
-      );
-      return;
-    }
 
     setState(() => _submitting = true);
     final String? error = await AuthProvider.instance.service.register(
-      _usernameController.text,
-      _passwordController.text,
-      _securityQuestion!,
-      _answerController.text,
+      email: _emailController.text,
+      password: _passwordController.text,
+      name: _nameController.text,
+      region: _regionController.text,
+      facility: _facilityController.text,
     );
     if (!mounted) return;
     setState(() => _submitting = false);
@@ -58,12 +60,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
       return;
     }
 
+    // Registration signs the CHW in automatically; the router redirect sends
+    // them to the home screen once the session updates.
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Account created. Please log in.'),
-      ),
+      const SnackBar(content: Text('Account created. Welcome!')),
     );
-    context.go('/login');
+    context.go('/');
   }
 
   @override
@@ -75,17 +77,69 @@ class _RegisterScreenState extends State<RegisterScreen> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: <Widget>[
-            _sectionLabel(context, 'Choose a username'),
+            _sectionLabel(context, 'Your name'),
             TextFormField(
-              controller: _usernameController,
+              controller: _nameController,
               textInputAction: TextInputAction.next,
+              textCapitalization: TextCapitalization.words,
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
-                hintText: 'e.g. your name or CHW ID',
-                prefixIcon: Icon(Icons.person_outline),
+                hintText: 'Full name',
+                prefixIcon: Icon(Icons.badge_outlined),
               ),
               validator: (String? v) => (v == null || v.trim().isEmpty)
-                  ? 'Username is required'
+                  ? 'Please enter your name'
+                  : null,
+            ),
+            const SizedBox(height: 20),
+
+            _sectionLabel(context, 'Email'),
+            TextFormField(
+              controller: _emailController,
+              textInputAction: TextInputAction.next,
+              keyboardType: TextInputType.emailAddress,
+              autocorrect: false,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                hintText: 'you@example.com',
+                prefixIcon: Icon(Icons.email_outlined),
+              ),
+              validator: (String? v) {
+                if (v == null || v.trim().isEmpty) return 'Email is required';
+                if (!v.contains('@') || !v.contains('.')) {
+                  return 'Please enter a valid email address';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 20),
+
+            _sectionLabel(context, 'Where you work'),
+            TextFormField(
+              controller: _regionController,
+              textInputAction: TextInputAction.next,
+              textCapitalization: TextCapitalization.words,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Region / District',
+                prefixIcon: Icon(Icons.map_outlined),
+              ),
+              validator: (String? v) => (v == null || v.trim().isEmpty)
+                  ? 'Please enter your region'
+                  : null,
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _facilityController,
+              textInputAction: TextInputAction.next,
+              textCapitalization: TextCapitalization.words,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Health facility',
+                prefixIcon: Icon(Icons.local_hospital_outlined),
+              ),
+              validator: (String? v) => (v == null || v.trim().isEmpty)
+                  ? 'Please enter your facility'
                   : null,
             ),
             const SizedBox(height: 20),
@@ -129,49 +183,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ? 'Passwords do not match'
                   : null,
             ),
-            const SizedBox(height: 20),
-
-            _sectionLabel(context, 'Security question'),
+            const SizedBox(height: 12),
             Text(
-              'Used to recover your account if you forget your password. '
-              'There is no internet, so choose an answer you will remember.',
+              'Creating your account needs internet this one time. '
+              'After that, you can use the app offline.',
               style: Theme.of(context)
                   .textTheme
                   .bodySmall
                   ?.copyWith(color: AppColors.textSecondary),
             ),
-            const SizedBox(height: 8),
-            DropdownButtonFormField<String>(
-              initialValue: _securityQuestion,
-              isExpanded: true,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                hintText: 'Select a question',
-              ),
-              items: AppConstants.securityQuestions
-                  .map((String q) => DropdownMenuItem<String>(
-                        value: q,
-                        child: Text(q, overflow: TextOverflow.ellipsis),
-                      ))
-                  .toList(),
-              onChanged: (String? value) =>
-                  setState(() => _securityQuestion = value),
-              validator: (String? v) =>
-                  v == null ? 'Please choose a security question' : null,
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _answerController,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'Your answer',
-                prefixIcon: Icon(Icons.question_answer_outlined),
-              ),
-              validator: (String? v) => (v == null || v.trim().isEmpty)
-                  ? 'Please answer your security question'
-                  : null,
-            ),
-            const SizedBox(height: 28),
+            const SizedBox(height: 24),
 
             ElevatedButton.icon(
               icon: _submitting

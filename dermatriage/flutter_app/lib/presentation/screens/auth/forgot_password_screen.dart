@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/colors.dart';
 import '../../providers/auth_provider.dart';
 
-/// Offline "forgot password" recovery:
-/// 1. enter username → app looks up the stored security question
-/// 2. answer the question and set a new password
+/// Password recovery: enter your email and Firebase sends a reset link.
 ///
-/// There is no email/server — the security question is the recovery path.
+/// This needs internet (it sends an email). Once the link is used, the CHW can
+/// sign in again with the new password.
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
 
@@ -18,55 +16,24 @@ class ForgotPasswordScreen extends StatefulWidget {
 }
 
 class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
-  final _usernameFormKey = GlobalKey<FormState>();
-  final _resetFormKey = GlobalKey<FormState>();
+  final _formKey = GlobalKey<FormState>();
+  final _emailController = TextEditingController();
 
-  final _usernameController = TextEditingController();
-  final _answerController = TextEditingController();
-  final _passwordController = TextEditingController();
-  final _confirmController = TextEditingController();
-
-  String? _securityQuestion; // non-null once the username is confirmed
-  bool _obscurePassword = true;
   bool _busy = false;
+  bool _sent = false;
 
   @override
   void dispose() {
-    _usernameController.dispose();
-    _answerController.dispose();
-    _passwordController.dispose();
-    _confirmController.dispose();
+    _emailController.dispose();
     super.dispose();
   }
 
-  Future<void> _onFindAccount() async {
-    if (!_usernameFormKey.currentState!.validate()) return;
-
-    setState(() => _busy = true);
-    final String? question = await AuthProvider.instance.service
-        .getSecurityQuestion(_usernameController.text);
-    if (!mounted) return;
-    setState(() => _busy = false);
-
-    if (question == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No account found with that username.')),
-      );
-      return;
-    }
-    setState(() => _securityQuestion = question);
-  }
-
-  Future<void> _onResetPassword() async {
-    if (!_resetFormKey.currentState!.validate()) return;
+  Future<void> _onSendReset() async {
+    if (!_formKey.currentState!.validate()) return;
 
     setState(() => _busy = true);
     final String? error = await AuthProvider.instance.service
-        .resetPasswordWithSecurityAnswer(
-      _usernameController.text,
-      _answerController.text,
-      _passwordController.text,
-    );
+        .sendPasswordReset(_emailController.text);
     if (!mounted) return;
     setState(() => _busy = false);
 
@@ -75,11 +42,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           .showSnackBar(SnackBar(content: Text(error)));
       return;
     }
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Password updated. Please log in.')),
-    );
-    context.go('/login');
+    setState(() => _sent = true);
   }
 
   @override
@@ -89,25 +52,22 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: <Widget>[
-          if (_securityQuestion == null)
-            _buildUsernameStep(context)
-          else
-            _buildResetStep(context),
+          if (_sent) _buildSent(context) else _buildForm(context),
         ],
       ),
     );
   }
 
-  Widget _buildUsernameStep(BuildContext context) {
+  Widget _buildForm(BuildContext context) {
     return Form(
-      key: _usernameFormKey,
+      key: _formKey,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          _sectionLabel(context, 'Enter your username'),
+          _sectionLabel(context, 'Enter your email'),
           Text(
-            'We will show your security question so you can reset your '
-            'password — all on this device.',
+            'We will email you a link to reset your password. '
+            'This needs an internet connection.',
             style: Theme.of(context)
                 .textTheme
                 .bodySmall
@@ -115,106 +75,62 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           ),
           const SizedBox(height: 12),
           TextFormField(
-            controller: _usernameController,
+            controller: _emailController,
+            keyboardType: TextInputType.emailAddress,
+            autocorrect: false,
             decoration: const InputDecoration(
               border: OutlineInputBorder(),
-              labelText: 'Username',
-              prefixIcon: Icon(Icons.person_outline),
+              labelText: 'Email',
+              prefixIcon: Icon(Icons.email_outlined),
             ),
             validator: (String? v) => (v == null || v.trim().isEmpty)
-                ? 'Please enter your username'
+                ? 'Please enter your email'
                 : null,
           ),
           const SizedBox(height: 24),
           ElevatedButton.icon(
-            icon: const Icon(Icons.search),
-            label: Text(_busy ? 'Please wait...' : 'Continue'),
-            onPressed: _busy ? null : _onFindAccount,
+            icon: const Icon(Icons.send),
+            label: Text(_busy ? 'Sending...' : 'Send Reset Link'),
+            onPressed: _busy ? null : _onSendReset,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildResetStep(BuildContext context) {
-    return Form(
-      key: _resetFormKey,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          _sectionLabel(context, 'Security question'),
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Text(
-                _securityQuestion!,
-                style: Theme.of(context)
-                    .textTheme
-                    .bodyLarge
-                    ?.copyWith(fontWeight: FontWeight.w600),
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          TextFormField(
-            controller: _answerController,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              labelText: 'Your answer',
-              prefixIcon: Icon(Icons.question_answer_outlined),
-            ),
-            validator: (String? v) => (v == null || v.trim().isEmpty)
-                ? 'Please enter your answer'
-                : null,
-          ),
-          const SizedBox(height: 20),
-          _sectionLabel(context, 'New password'),
-          TextFormField(
-            controller: _passwordController,
-            obscureText: _obscurePassword,
-            decoration: InputDecoration(
-              border: const OutlineInputBorder(),
-              hintText:
-                  'At least ${AppConstants.minPasswordLength} characters',
-              prefixIcon: const Icon(Icons.lock_outline),
-              suffixIcon: IconButton(
-                icon: Icon(_obscurePassword
-                    ? Icons.visibility_off
-                    : Icons.visibility),
-                onPressed: () =>
-                    setState(() => _obscurePassword = !_obscurePassword),
-              ),
-            ),
-            validator: (String? v) {
-              if (v == null || v.isEmpty) return 'Password is required';
-              if (v.length < AppConstants.minPasswordLength) {
-                return 'Use at least ${AppConstants.minPasswordLength} '
-                    'characters';
-              }
-              return null;
-            },
-          ),
-          const SizedBox(height: 16),
-          TextFormField(
-            controller: _confirmController,
-            obscureText: _obscurePassword,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              labelText: 'Confirm new password',
-              prefixIcon: Icon(Icons.lock_outline),
-            ),
-            validator: (String? v) => (v != _passwordController.text)
-                ? 'Passwords do not match'
-                : null,
-          ),
-          const SizedBox(height: 24),
-          ElevatedButton.icon(
-            icon: const Icon(Icons.lock_reset),
-            label: Text(_busy ? 'Saving...' : 'Reset Password'),
-            onPressed: _busy ? null : _onResetPassword,
-          ),
-        ],
-      ),
+  Widget _buildSent(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        const SizedBox(height: 24),
+        const Icon(Icons.mark_email_read_outlined,
+            size: 64, color: AppColors.primary),
+        const SizedBox(height: 16),
+        Text(
+          'Check your email',
+          textAlign: TextAlign.center,
+          style: Theme.of(context)
+              .textTheme
+              .titleLarge
+              ?.copyWith(fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'We sent a reset link to ${_emailController.text.trim()}. '
+          'Open it to set a new password, then come back and log in.',
+          textAlign: TextAlign.center,
+          style: Theme.of(context)
+              .textTheme
+              .bodyMedium
+              ?.copyWith(color: AppColors.textSecondary),
+        ),
+        const SizedBox(height: 24),
+        ElevatedButton.icon(
+          icon: const Icon(Icons.login),
+          label: const Text('Back to Log In'),
+          onPressed: () => context.go('/login'),
+        ),
+      ],
     );
   }
 

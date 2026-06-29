@@ -2,9 +2,9 @@ import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../presentation/providers/auth_provider.dart';
-import '../../presentation/screens/auth/change_password_screen.dart';
 import '../../presentation/screens/auth/forgot_password_screen.dart';
 import '../../presentation/screens/auth/login_screen.dart';
+import '../../presentation/screens/auth/profile_screen.dart';
 import '../../presentation/screens/auth/register_screen.dart';
 import '../../presentation/screens/camera/camera_screen.dart';
 import '../../presentation/screens/history/history_screen.dart';
@@ -59,9 +59,9 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state) => const ForgotPasswordScreen(),
     ),
     GoRoute(
-      path: '/change-password',
-      name: 'changePassword',
-      builder: (context, state) => const ChangePasswordScreen(),
+      path: '/profile',
+      name: 'profile',
+      builder: (context, state) => const ProfileScreen(),
     ),
     GoRoute(
       path: '/',

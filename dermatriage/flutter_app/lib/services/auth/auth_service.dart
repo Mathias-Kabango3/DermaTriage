@@ -1,109 +1,194 @@
-import 'package:bcrypt/bcrypt.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
-import '../../data/datasources/local/user_dao.dart';
-import '../../data/models/app_user.dart';
-
-/// Offline authentication logic for CHW accounts.
+/// Online authentication for CHW accounts, backed by Firebase Auth.
 ///
-/// All operations run entirely on-device against the local SQLite database.
-/// Passwords and security answers are only ever persisted as bcrypt hashes;
-/// the raw values are never stored, so a forgotten password can be *reset*
-/// (via the security question) but never *retrieved*.
+/// Authentication happens **online** so the project owner can see how many
+/// CHWs are registered (Firebase console) and so accounts can be managed
+/// properly. Firebase Auth persists the signed-in session to disk by default,
+/// so after the first online sign-in the app keeps working **offline** for
+/// triage — only sign-in, registration and profile changes need the internet.
+///
+/// Extra profile fields that Firebase Auth cannot hold (region, facility) live
+/// in a `chws/{uid}` Cloud Firestore document.
 class AuthService {
-  final UserDao _dao;
+  final FirebaseAuth _auth;
+  final FirebaseFirestore _db;
 
-  AuthService({UserDao? dao}) : _dao = dao ?? UserDao();
+  AuthService({FirebaseAuth? auth, FirebaseFirestore? db})
+      : _auth = auth ?? FirebaseAuth.instance,
+        _db = db ?? FirebaseFirestore.instance;
 
-  /// Register a new CHW.
+  /// Firestore collection of CHW profile documents.
+  CollectionReference<Map<String, dynamic>> get _chws =>
+      _db.collection('chws');
+
+  /// Register a new CHW with email/password and store their profile.
   ///
-  /// Returns a human-friendly error message on failure, or null on success.
-  Future<String?> register(
-    String username,
-    String password,
-    String securityQuestion,
-    String securityAnswer,
-  ) async {
-    final String name = username.trim();
-    if (name.isEmpty) return 'Please enter a username.';
-    if (password.isEmpty) return 'Please enter a password.';
-    if (securityAnswer.trim().isEmpty) {
-      return 'Please answer your security question.';
+  /// Returns a CHW-friendly error message on failure, or null on success.
+  Future<String?> register({
+    required String email,
+    required String password,
+    required String name,
+    required String region,
+    required String facility,
+  }) async {
+    try {
+      final UserCredential cred = await _auth.createUserWithEmailAndPassword(
+        email: email.trim(),
+        password: password,
+      );
+      final User user = cred.user!;
+      await user.updateDisplayName(name.trim());
+      await _chws.doc(user.uid).set(<String, dynamic>{
+        'name': name.trim(),
+        'email': email.trim(),
+        'region': region.trim(),
+        'facility': facility.trim(),
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+      return null;
+    } on FirebaseAuthException catch (e) {
+      return _authMessage(e);
+    } catch (_) {
+      return 'Something went wrong while creating your account. '
+          'Please try again.';
     }
+  }
 
-    final AppUser? existing = await _dao.getByUsername(name);
-    if (existing != null) {
-      return 'That username is already taken. Please choose another.';
+  /// Sign a CHW in. Returns null on success or a friendly error message.
+  Future<String?> signIn(String email, String password) async {
+    try {
+      await _auth.signInWithEmailAndPassword(
+        email: email.trim(),
+        password: password,
+      );
+      return null;
+    } on FirebaseAuthException catch (e) {
+      return _authMessage(e);
+    } catch (_) {
+      return 'Something went wrong while signing in. Please try again.';
     }
-
-    final AppUser user = AppUser(
-      username: name,
-      passwordHash: _hash(password),
-      securityQuestion: securityQuestion,
-      securityAnswerHash: _hash(_normalizeAnswer(securityAnswer)),
-      createdAt: DateTime.now(),
-    );
-    await _dao.insertUser(user);
-    return null;
   }
 
-  /// Verify a username/password pair. Returns true on success.
-  Future<bool> login(String username, String password) async {
-    final AppUser? user = await _dao.getByUsername(username.trim());
-    if (user == null) return false;
-    return BCrypt.checkpw(password, user.passwordHash);
-  }
+  /// Sign the current CHW out (clears the locally persisted session).
+  Future<void> signOut() => _auth.signOut();
 
-  /// Change the password for a user who knows their current one.
-  ///
-  /// Verifies [oldPassword] first. Returns an error message on failure, or
-  /// null on success.
-  Future<String?> changePassword(
-    String username,
-    String oldPassword,
-    String newPassword,
-  ) async {
-    final AppUser? user = await _dao.getByUsername(username.trim());
-    if (user == null) return 'Account not found.';
-    if (!BCrypt.checkpw(oldPassword, user.passwordHash)) {
-      return 'Your current password is incorrect.';
+  /// Send a password-reset email (requires internet).
+  Future<String?> sendPasswordReset(String email) async {
+    try {
+      await _auth.sendPasswordResetEmail(email: email.trim());
+      return null;
+    } on FirebaseAuthException catch (e) {
+      return _authMessage(e);
+    } catch (_) {
+      return 'Could not send the reset email. Please try again.';
     }
-    await _dao.updatePasswordHash(user.username, _hash(newPassword));
-    return null;
   }
 
-  /// Return the stored security question for [username], or null if there is
-  /// no such account. Used by the offline "forgot password" flow.
-  Future<String?> getSecurityQuestion(String username) async {
-    final AppUser? user = await _dao.getByUsername(username.trim());
-    return user?.securityQuestion;
-  }
-
-  /// Offline password recovery: verify the security answer, then set a new
-  /// password. Returns an error message on failure, or null on success.
-  Future<String?> resetPasswordWithSecurityAnswer(
-    String username,
-    String securityAnswer,
-    String newPassword,
-  ) async {
-    final AppUser? user = await _dao.getByUsername(username.trim());
-    if (user == null) return 'No account found with that username.';
-    if (!BCrypt.checkpw(
-      _normalizeAnswer(securityAnswer),
-      user.securityAnswerHash,
-    )) {
-      return 'That answer does not match. Please try again.';
+  /// Read the current CHW's extra profile fields (region/facility) from
+  /// Firestore. Works offline from cache once fetched. Returns an empty map
+  /// if there is no profile document yet.
+  Future<Map<String, dynamic>> loadProfile() async {
+    final User? user = _auth.currentUser;
+    if (user == null) return <String, dynamic>{};
+    try {
+      final snap = await _chws.doc(user.uid).get();
+      return snap.data() ?? <String, dynamic>{};
+    } catch (_) {
+      return <String, dynamic>{};
     }
-    await _dao.updatePasswordHash(user.username, _hash(newPassword));
-    return null;
   }
 
-  /// Whether at least one CHW account exists on this device.
-  Future<bool> hasAnyUser() async => (await _dao.count()) > 0;
+  /// Update the CHW's display name and Firestore profile fields
+  /// (region/facility). Returns null on success or a friendly error message.
+  Future<String?> updateProfile({
+    required String name,
+    required String region,
+    required String facility,
+  }) async {
+    final User? user = _auth.currentUser;
+    if (user == null) return 'You are not signed in.';
+    try {
+      await user.updateDisplayName(name.trim());
+      await _chws.doc(user.uid).set(<String, dynamic>{
+        'name': name.trim(),
+        'region': region.trim(),
+        'facility': facility.trim(),
+      }, SetOptions(merge: true));
+      return null;
+    } on FirebaseAuthException catch (e) {
+      return _authMessage(e);
+    } catch (_) {
+      return 'Could not save your profile. Please check your internet '
+          'connection and try again.';
+    }
+  }
 
-  /// Hash a secret with a freshly generated bcrypt salt.
-  String _hash(String value) => BCrypt.hashpw(value, BCrypt.gensalt());
+  /// Start an email change. Firebase sends a confirmation link to the new
+  /// address; the email only changes once the CHW taps it. Requires internet.
+  Future<String?> updateEmail(String newEmail) async {
+    final User? user = _auth.currentUser;
+    if (user == null) return 'You are not signed in.';
+    try {
+      await user.verifyBeforeUpdateEmail(newEmail.trim());
+      await _chws.doc(user.uid).set(
+        <String, dynamic>{'email': newEmail.trim()},
+        SetOptions(merge: true),
+      );
+      return null;
+    } on FirebaseAuthException catch (e) {
+      return _authMessage(e);
+    } catch (_) {
+      return 'Could not update your email. Please try again.';
+    }
+  }
 
-  /// Normalise a security answer so matching is case- and
-  /// whitespace-insensitive.
-  String _normalizeAnswer(String answer) => answer.trim().toLowerCase();
+  /// Change the signed-in CHW's password. Requires internet, and Firebase may
+  /// require a recent sign-in (handled with a friendly message).
+  Future<String?> updatePassword(String newPassword) async {
+    final User? user = _auth.currentUser;
+    if (user == null) return 'You are not signed in.';
+    try {
+      await user.updatePassword(newPassword);
+      return null;
+    } on FirebaseAuthException catch (e) {
+      return _authMessage(e);
+    } catch (_) {
+      return 'Could not change your password. Please try again.';
+    }
+  }
+
+  /// Map Firebase error codes to short, non-technical messages for CHWs.
+  String _authMessage(FirebaseAuthException e) {
+    switch (e.code) {
+      case 'network-request-failed':
+        return 'No internet connection. The first sign-in or registration '
+            'needs internet — after that, the app works offline.';
+      case 'email-already-in-use':
+        return 'An account with this email already exists. '
+            'Please log in instead.';
+      case 'invalid-email':
+        return 'Please enter a valid email address.';
+      case 'weak-password':
+        return 'Please choose a stronger password (at least 6 characters).';
+      case 'user-not-found':
+      case 'wrong-password':
+      case 'invalid-credential':
+        return 'Incorrect email or password.';
+      case 'user-disabled':
+        return 'This account has been disabled. '
+            'Please contact your supervisor.';
+      case 'too-many-requests':
+        return 'Too many attempts. Please wait a moment and try again.';
+      case 'requires-recent-login':
+        return 'For your security, please log out and log in again before '
+            'making this change.';
+      case 'operation-not-allowed':
+        return 'This sign-in method is not enabled. '
+            'Please contact your supervisor.';
+      default:
+        return 'Something went wrong. Please try again.';
+    }
+  }
 }

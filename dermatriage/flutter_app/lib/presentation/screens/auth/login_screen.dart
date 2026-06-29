@@ -6,6 +6,10 @@ import '../../../core/theme/colors.dart';
 import '../../providers/auth_provider.dart';
 
 /// Sign-in gate shown before any triage features are accessible.
+///
+/// Sign-in is online (it needs internet the first time). Once signed in,
+/// Firebase persists the session locally so the app opens straight into triage
+/// offline on later launches.
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -15,7 +19,7 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _usernameController = TextEditingController();
+  final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
   bool _obscurePassword = true;
@@ -23,7 +27,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   void dispose() {
-    _usernameController.dispose();
+    _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
@@ -32,20 +36,20 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _submitting = true);
-    final bool ok = await AuthProvider.instance.login(
-      _usernameController.text,
+    final String? error = await AuthProvider.instance.service.signIn(
+      _emailController.text,
       _passwordController.text,
     );
     if (!mounted) return;
     setState(() => _submitting = false);
 
-    if (ok) {
-      // Router redirect takes over once the session updates; navigate
+    if (error == null) {
+      // The router redirect takes over once the session updates; navigate
       // explicitly as well so the home screen shows immediately.
       context.go('/');
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Incorrect username or password.')),
+        SnackBar(content: Text(error)),
       );
     }
   }
@@ -94,15 +98,17 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 32),
                   TextFormField(
-                    controller: _usernameController,
+                    controller: _emailController,
                     textInputAction: TextInputAction.next,
+                    keyboardType: TextInputType.emailAddress,
+                    autocorrect: false,
                     decoration: const InputDecoration(
                       border: OutlineInputBorder(),
-                      labelText: 'Username',
-                      prefixIcon: Icon(Icons.person_outline),
+                      labelText: 'Email',
+                      prefixIcon: Icon(Icons.email_outlined),
                     ),
                     validator: (String? v) => (v == null || v.trim().isEmpty)
-                        ? 'Please enter your username'
+                        ? 'Please enter your email'
                         : null,
                   ),
                   const SizedBox(height: 16),
@@ -148,7 +154,17 @@ class _LoginScreenState extends State<LoginScreen> {
                     label: Text(_submitting ? 'Signing in...' : 'Log In'),
                     onPressed: _submitting ? null : _onLogin,
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
+                  Text(
+                    'The first sign-in needs internet. '
+                    'After that, the app works offline.',
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodySmall
+                        ?.copyWith(color: AppColors.textSecondary),
+                  ),
+                  const SizedBox(height: 12),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[

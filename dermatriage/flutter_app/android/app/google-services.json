@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "914422888140",
+    "project_id": "dermaafrica-b2cd9",
+    "storage_bucket": "dermaafrica-b2cd9.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:914422888140:android:a649eaecf032a0646f7469",
+        "android_client_info": {
+          "package_name": "com.example.dermatriage"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDJ6ncWO-kG1ud1XiQlt6TkFOQ3ZMwLDds"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
