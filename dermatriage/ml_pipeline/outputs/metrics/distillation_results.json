@@ -1,0 +1,104 @@
+{
+  "Teacher_EfficientNet-B0": {
+    "model": "Teacher_EfficientNet-B0",
+    "accuracy": 0.8537,
+    "macro_f1": 0.8683,
+    "per_class": {
+      "Fungal": {
+        "precision": 0.7611,
+        "recall": 0.7544,
+        "f1": 0.7577
+      },
+      "Scabies": {
+        "precision": 0.8526,
+        "recall": 0.875,
+        "f1": 0.8636
+      },
+      "Eczema": {
+        "precision": 0.7308,
+        "recall": 0.7103,
+        "f1": 0.7204
+      },
+      "healthy_skin": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "not_skin": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      }
+    },
+    "dark_skin_disparity": 0.062,
+    "params": 4013953
+  },
+  "Student_baseline (no distill)": {
+    "model": "Student_baseline (no distill)",
+    "accuracy": 0.7936,
+    "macro_f1": 0.8061,
+    "per_class": {
+      "Fungal": {
+        "precision": 0.6847,
+        "recall": 0.6667,
+        "f1": 0.6756
+      },
+      "Scabies": {
+        "precision": 0.6897,
+        "recall": 0.9211,
+        "f1": 0.7887
+      },
+      "Eczema": {
+        "precision": 0.8,
+        "recall": 0.4486,
+        "f1": 0.5749
+      },
+      "healthy_skin": {
+        "precision": 1.0,
+        "recall": 0.9833,
+        "f1": 0.9916
+      },
+      "not_skin": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      }
+    },
+    "dark_skin_disparity": 0.1379,
+    "params": 1522981
+  },
+  "Student_distilled": {
+    "model": "Student_distilled",
+    "accuracy": 0.8368,
+    "macro_f1": 0.8501,
+    "per_class": {
+      "Fungal": {
+        "precision": 0.7551,
+        "recall": 0.6491,
+        "f1": 0.6981
+      },
+      "Scabies": {
+        "precision": 0.8323,
+        "recall": 0.8816,
+        "f1": 0.8562
+      },
+      "Eczema": {
+        "precision": 0.6964,
+        "recall": 0.729,
+        "f1": 0.7123
+      },
+      "healthy_skin": {
+        "precision": 0.9677,
+        "recall": 1.0,
+        "f1": 0.9836
+      },
+      "not_skin": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      }
+    },
+    "dark_skin_disparity": 0.0685,
+    "params": 1522981
+  }
+}

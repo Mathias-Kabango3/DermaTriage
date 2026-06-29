@@ -1,0 +1,82 @@
+{
+  "EfficientNet-B0": {
+    "model": "EfficientNet-B0",
+    "accuracy": 0.8537,
+    "macro_f1": 0.8683,
+    "per_class": {
+      "Fungal": {
+        "precision": 0.7611,
+        "recall": 0.7544,
+        "f1": 0.7577,
+        "support": 114
+      },
+      "Scabies": {
+        "precision": 0.8526,
+        "recall": 0.875,
+        "f1": 0.8636,
+        "support": 152
+      },
+      "Eczema": {
+        "precision": 0.7308,
+        "recall": 0.7103,
+        "f1": 0.7204,
+        "support": 107
+      },
+      "healthy_skin": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 60
+      },
+      "not_skin": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 100
+      }
+    },
+    "dark_skin_disparity": 0.062,
+    "best_val": 0.8693,
+    "params": 4013953
+  },
+  "ResNet-18": {
+    "model": "ResNet-18",
+    "accuracy": 0.8311,
+    "macro_f1": 0.8473,
+    "per_class": {
+      "Fungal": {
+        "precision": 0.8021,
+        "recall": 0.6754,
+        "f1": 0.7333,
+        "support": 114
+      },
+      "Scabies": {
+        "precision": 0.7684,
+        "recall": 0.8947,
+        "f1": 0.8267,
+        "support": 152
+      },
+      "Eczema": {
+        "precision": 0.7,
+        "recall": 0.6542,
+        "f1": 0.6763,
+        "support": 107
+      },
+      "healthy_skin": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 60
+      },
+      "not_skin": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 100
+      }
+    },
+    "dark_skin_disparity": 0.0726,
+    "best_val": 0.8537,
+    "params": 11179077
+  }
+}
