@@ -48,12 +48,17 @@ flutter {
     source = "../.."
 }
 
-// tflite_flutter pulls the TensorFlow Lite Java AARs (2.11.0), which share the
-// namespace 'org.tensorflow.lite' and fail AGP 8's manifest merger. The plugin
-// uses the native C library via FFI (built with CMake) and does not reference
-// these Java classes, so excluding them resolves the collision safely.
+// tflite_flutter loads the native library `libtensorflowlite_jni.so` via FFI at
+// runtime; that .so ships inside the `org.tensorflow:tensorflow-lite` AAR, so
+// that artifact MUST be packaged or inference fails with
+// "dlopen failed: library 'libtensorflowlite_jni.so' not found".
+//
+// The AGP manifest-merger conflict comes from `tensorflow-lite-gpu` and
+// `tensorflow-lite-api`, which declare the SAME 'org.tensorflow.lite' namespace
+// as `tensorflow-lite`. We don't use the GPU delegate, so we exclude both of
+// those and keep `tensorflow-lite` alone — giving a unique namespace AND the
+// native library.
 configurations.all {
-    exclude(group = "org.tensorflow", module = "tensorflow-lite")
     exclude(group = "org.tensorflow", module = "tensorflow-lite-gpu")
     exclude(group = "org.tensorflow", module = "tensorflow-lite-api")
 }

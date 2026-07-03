@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/colors.dart';
 import '../../providers/auth_provider.dart';
+import '../../widgets/common/app_logo.dart';
 
 /// Landing screen: branding and primary actions.
 class HomeScreen extends StatelessWidget {
@@ -111,19 +112,7 @@ class HomeScreen extends StatelessWidget {
                   children: <Widget>[
                     const SizedBox(height: 24),
                     // Logo / title area.
-                    Container(
-                      width: 96,
-                      height: 96,
-                      decoration: const BoxDecoration(
-                        color: AppColors.primaryLight,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.health_and_safety,
-                        size: 52,
-                        color: Colors.white,
-                      ),
-                    ),
+                    const AppLogo(size: 96),
                     const SizedBox(height: 16),
                     Text(
                       AppConstants.appName,

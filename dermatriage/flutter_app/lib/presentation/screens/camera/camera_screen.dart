@@ -141,7 +141,10 @@ class _CameraScreenState extends State<CameraScreen>
 
       if (!mounted) return;
       context.read<TriageProvider>().setCapturedImage(File(savedPath));
-      context.push('/result');
+      // Await the result route so capture is re-enabled when the CHW returns
+      // here (e.g. via "Retake Photo" after a rejection).
+      await context.push('/result');
+      if (mounted) setState(() => _capturing = false);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -176,7 +179,8 @@ class _CameraScreenState extends State<CameraScreen>
       body: Stack(
         fit: StackFit.expand,
         children: <Widget>[
-          CameraPreview(controller),
+          // Fill the whole screen with the live preview (cover, no black bars).
+          _FullScreenPreview(controller: controller),
           const CameraOverlay(),
           // Back button.
           SafeArea(
@@ -245,6 +249,33 @@ class _CameraScreenState extends State<CameraScreen>
               ],
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Fills the screen with the camera preview using BoxFit.cover, so there are no
+/// black letterbox bars and the live view matches what gets captured.
+class _FullScreenPreview extends StatelessWidget {
+  final CameraController controller;
+
+  const _FullScreenPreview({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    final Size? preview = controller.value.previewSize;
+    if (preview == null) return CameraPreview(controller);
+
+    return ClipRect(
+      child: FittedBox(
+        fit: BoxFit.cover,
+        child: SizedBox(
+          // previewSize is reported in sensor (landscape) orientation; swap
+          // width/height for the portrait camera UI.
+          width: preview.height,
+          height: preview.width,
+          child: CameraPreview(controller),
         ),
       ),
     );

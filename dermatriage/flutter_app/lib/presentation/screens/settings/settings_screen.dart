@@ -97,7 +97,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ListTile(
             leading: const Icon(Icons.memory),
             title: const Text('Model version'),
-            trailing: Text(_modelVersion),
+            // The model id is long, so show it below the title (left-aligned,
+            // wraps) rather than squeezed into the trailing slot.
+            subtitle: Text(_modelVersion),
           ),
           const Divider(),
           const _SectionHeader('Disclaimer'),

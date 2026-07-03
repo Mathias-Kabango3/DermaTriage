@@ -1,5 +1,43 @@
 import 'triage_levels.dart';
 
+/// What the app should do with a single model prediction.
+///
+/// Only [diagnosis] reveals a disease + triage level. The other three are
+/// "rejection" outcomes: the model is confident the image is healthy skin or
+/// not skin at all, or it is not confident enough to suggest anything.
+enum TriageOutcome {
+  /// A diagnosable skin condition was predicted with sufficient confidence.
+  diagnosis,
+
+  /// The model thinks the skin looks healthy — no condition to triage.
+  healthy,
+
+  /// The model thinks the image is not skin (e.g. a wall, floor, object).
+  notSkin,
+
+  /// The top prediction is below the confidence threshold — ask for a retake.
+  lowConfidence,
+}
+
+/// The model's five output classes, in **logit-index order** (0-4).
+///
+/// This MUST match the training order exactly:
+///   0 Fungal, 1 Scabies, 2 Eczema, 3 healthy_skin, 4 not_skin.
+/// Do NOT reorder — the argmax index is looked up here to label the output.
+const List<String> kModelClassIds = <String>[
+  'fungal', // 0
+  'scabies', // 1
+  'eczema', // 2
+  'healthy_skin', // 3
+  'not_skin', // 4
+];
+
+/// Index of the `healthy_skin` class in [kModelClassIds].
+const int kHealthySkinIndex = 3;
+
+/// Index of the `not_skin` class in [kModelClassIds].
+const int kNotSkinIndex = 4;
+
 /// Metadata for one of the harmonised skin-disease classes.
 class DiseaseClass {
   final int index;
@@ -21,102 +59,25 @@ class DiseaseClass {
   });
 }
 
-/// The 11 merged classes (HAM10000 indices 0-6 + PASSION indices 7-10),
-/// ordered to match the model's output logits exactly (CLASS_TO_IDX_11 in
-/// ml_pipeline/src/data/harmonise_labels.py). Do NOT reorder.
+/// The three **diagnosable** classes, at model logit indices 0-2.
+///
+/// `healthy_skin` (3) and `not_skin` (4) are deliberately absent: they are
+/// rejection outcomes (see [TriageOutcome]) with no disease metadata or triage
+/// level. The list index matches the model logit index — do NOT reorder.
 const List<DiseaseClass> kDiseaseClasses = <DiseaseClass>[
-  // --- HAM10000 classes (indices 0-6) ---
   DiseaseClass(
     index: 0,
-    id: 'melanoma',
-    displayName: 'Melanoma',
-    triageLevel: TriageLevel.urgentReferral,
-    icd10Code: 'C43.9',
-    isNtd: false,
-    description:
-        'Malignant melanoma — an aggressive skin cancer. Suspicious '
-        'pigmented lesions require urgent specialist referral.',
-  ),
-  DiseaseClass(
-    index: 1,
-    id: 'melanocytic_nevus',
-    displayName: 'Melanocytic Nevus',
-    triageLevel: TriageLevel.monitor,
-    icd10Code: 'D22.9',
-    isNtd: false,
-    description:
-        'A common benign mole. Usually harmless; monitor for change in '
-        'size, shape or colour and refer if suspicious.',
-  ),
-  DiseaseClass(
-    index: 2,
-    id: 'basal_cell_carcinoma',
-    displayName: 'Basal Cell Carcinoma',
-    triageLevel: TriageLevel.urgentReferral,
-    icd10Code: 'C44.91',
-    isNtd: false,
-    description:
-        'The most common skin cancer. Slow-growing but locally invasive; '
-        'refer for confirmation and treatment.',
-  ),
-  DiseaseClass(
-    index: 3,
-    id: 'actinic_keratosis',
-    displayName: 'Actinic Keratosis',
-    triageLevel: TriageLevel.urgentReferral,
-    icd10Code: 'L57.0',
-    isNtd: false,
-    description:
-        'A pre-malignant lesion from sun damage that can progress to '
-        'squamous cell carcinoma. Refer for assessment.',
-  ),
-  DiseaseClass(
-    index: 4,
-    id: 'benign_keratosis',
-    displayName: 'Benign Keratosis',
-    triageLevel: TriageLevel.monitor,
-    icd10Code: 'L82.1',
-    isNtd: false,
-    description:
-        'Benign keratosis-like lesion (e.g. seborrhoeic keratosis, '
-        'solar lentigo). Harmless; monitor and reassure.',
-  ),
-  DiseaseClass(
-    index: 5,
-    id: 'dermatofibroma',
-    displayName: 'Dermatofibroma',
-    triageLevel: TriageLevel.monitor,
-    icd10Code: 'D23.9',
-    isNtd: false,
-    description:
-        'A benign fibrous skin nodule. Harmless; monitor and refer only '
-        'if symptomatic or changing.',
-  ),
-  DiseaseClass(
-    index: 6,
-    id: 'vascular_lesion',
-    displayName: 'Vascular Lesion',
-    triageLevel: TriageLevel.monitor,
-    icd10Code: 'D18.0',
-    isNtd: false,
-    description:
-        'Benign vascular lesion (e.g. haemangioma, angioma). Usually '
-        'harmless; monitor.',
-  ),
-  // --- PASSION classes (indices 7-10) ---
-  DiseaseClass(
-    index: 7,
-    id: 'tinea_infection',
-    displayName: 'Tinea (Fungal Infection)',
+    id: 'fungal',
+    displayName: 'Fungal Infection',
     triageLevel: TriageLevel.treatLocally,
     icd10Code: 'B35.9',
     isNtd: false,
     description:
-        'Dermatophyte (ringworm) infection. Usually responds to topical '
-        'or oral antifungals at the community level.',
+        'A fungal (dermatophyte / ringworm) skin infection. Usually '
+        'responds to topical or oral antifungals at the community level.',
   ),
   DiseaseClass(
-    index: 8,
+    index: 1,
     id: 'scabies',
     displayName: 'Scabies',
     triageLevel: TriageLevel.treatLocally,
@@ -124,33 +85,25 @@ const List<DiseaseClass> kDiseaseClasses = <DiseaseClass>[
     isNtd: true,
     description:
         'Mite infestation causing intense itching. A WHO neglected tropical '
-        'disease; treat patient and contacts locally.',
+        'disease; treat the patient and close contacts locally.',
   ),
   DiseaseClass(
-    index: 9,
-    id: 'eczema_dermatitis',
+    index: 2,
+    id: 'eczema',
     displayName: 'Eczema / Dermatitis',
     triageLevel: TriageLevel.monitor,
     icd10Code: 'L30.9',
     isNtd: false,
     description:
         'Inflammatory, itchy skin condition. Manage symptoms and monitor; '
-        'refer if severe or infected.',
-  ),
-  DiseaseClass(
-    index: 10,
-    id: 'other_ntd',
-    displayName: 'Other / Neglected Tropical Disease',
-    triageLevel: TriageLevel.urgentReferral,
-    icd10Code: 'B88.9',
-    isNtd: true,
-    description:
-        'Possible neglected tropical skin disease or an unrecognised '
-        'condition. Refer for clinical assessment.',
+        'refer if severe, spreading, or infected.',
   ),
 ];
 
-/// Look up a [DiseaseClass] by its model output [index].
+/// Look up a diagnosable [DiseaseClass] by its model output [index] (0-2).
+///
+/// Only valid for the [TriageOutcome.diagnosis] classes; the rejection
+/// indices (`healthy_skin`, `not_skin`) have no [DiseaseClass].
 DiseaseClass getDiseaseByIndex(int index) {
   if (index < 0 || index >= kDiseaseClasses.length) {
     throw RangeError.index(index, kDiseaseClasses, 'index');

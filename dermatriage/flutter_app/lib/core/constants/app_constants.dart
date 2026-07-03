@@ -9,9 +9,15 @@ class AppConstants {
 
   // Model / inference
   static const String modelAssetPath =
-      'assets/models/skin_triage_model.tflite';
+      'assets/models/dermatriage_diverse.tflite';
   static const int imageSize = 224;
-  static const int numClasses = 11; // HAM10000 (7) + PASSION (4) union schema
+  // MobileNetV3-Small distilled student: 5 classes
+  // (Fungal, Scabies, Eczema, healthy_skin, not_skin).
+  static const int numClasses = 5;
+
+  /// Minimum top-class probability (after softmax) for the app to show a
+  /// diagnosis. Below this the CHW is asked to retake the photo.
+  static const double confidenceThreshold = 0.50;
 
   // Local database
   static const String databaseName = 'dermatriage.db';

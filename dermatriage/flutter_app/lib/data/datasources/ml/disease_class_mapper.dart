@@ -1,34 +1,82 @@
 import 'dart:math' as math;
 
+import '../../../core/constants/app_constants.dart';
 import '../../../core/constants/disease_classes.dart';
 
-/// Turns raw model logits into a human-meaningful prediction.
+/// A fully-resolved prediction: the raw top class plus the decision about how
+/// the app should present it (diagnose vs. reject).
+class TriagePrediction {
+  /// Argmax index into the model's output (0-4).
+  final int classIndex;
+
+  /// Stable id of the top class (e.g. `fungal`, `healthy_skin`, `not_skin`).
+  final String classId;
+
+  /// Top-class probability after softmax, in 0–1.
+  final double confidence;
+
+  /// How the UI should treat this prediction.
+  final TriageOutcome outcome;
+
+  /// Disease metadata — non-null only when [outcome] is
+  /// [TriageOutcome.diagnosis].
+  final DiseaseClass? disease;
+
+  /// Full softmax probability vector, index-aligned with [kModelClassIds].
+  final List<double> probabilities;
+
+  const TriagePrediction({
+    required this.classIndex,
+    required this.classId,
+    required this.confidence,
+    required this.outcome,
+    required this.disease,
+    required this.probabilities,
+  });
+}
+
+/// Turns raw model logits into a [TriagePrediction], applying the rejection
+/// rules: `not_skin` / `healthy_skin` never produce a diagnosis, and a top
+/// confidence below [AppConstants.confidenceThreshold] is rejected as
+/// low-confidence.
 class DiseaseClassMapper {
   DiseaseClassMapper._();
 
-  /// Apply softmax, pick the argmax class and resolve its metadata.
-  ///
-  /// Returns a map with keys:
-  ///   classIndex (int), classId (String), displayName (String),
-  ///   confidence (double 0–1), triageLevel (TriageLevel), allProbs (List<double>).
-  static Map<String, dynamic> mapLogits(List<double> logits) {
+  static TriagePrediction mapLogits(List<double> logits) {
     final List<double> probs = _softmax(logits);
 
     int argmax = 0;
     for (int i = 1; i < probs.length; i++) {
       if (probs[i] > probs[argmax]) argmax = i;
     }
+    final double confidence = probs[argmax];
+    final String classId = argmax < kModelClassIds.length
+        ? kModelClassIds[argmax]
+        : 'unknown';
 
-    final DiseaseClass disease = getDiseaseByIndex(argmax);
+    // Decide the outcome. Rejection of not_skin / healthy_skin takes priority
+    // over the confidence check, then the threshold gates everything else.
+    final TriageOutcome outcome;
+    DiseaseClass? disease;
+    if (argmax == kNotSkinIndex) {
+      outcome = TriageOutcome.notSkin;
+    } else if (argmax == kHealthySkinIndex) {
+      outcome = TriageOutcome.healthy;
+    } else if (confidence < AppConstants.confidenceThreshold) {
+      outcome = TriageOutcome.lowConfidence;
+    } else {
+      outcome = TriageOutcome.diagnosis;
+      disease = getDiseaseByIndex(argmax);
+    }
 
-    return <String, dynamic>{
-      'classIndex': disease.index,
-      'classId': disease.id,
-      'displayName': disease.displayName,
-      'confidence': probs[argmax],
-      'triageLevel': disease.triageLevel, // TriageLevel enum
-      'allProbs': probs,
-    };
+    return TriagePrediction(
+      classIndex: argmax,
+      classId: classId,
+      confidence: confidence,
+      outcome: outcome,
+      disease: disease,
+      probabilities: probs,
+    );
   }
 
   /// Numerically-stable softmax.

@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 /// A dark scrim with a clear rounded-rectangle cutout marking the lesion
@@ -9,13 +11,16 @@ class CameraOverlay extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
-        final double side = constraints.maxWidth * 0.72;
-        final double cutoutSize =
-            side.clamp(0.0, constraints.maxHeight * 0.5);
+        // A large centred square matching the region the model analyses
+        // (the centre crop of the captured photo).
+        final double cutoutSize = math.min(
+          constraints.maxWidth * 0.88,
+          constraints.maxHeight * 0.6,
+        );
         final Rect cutout = Rect.fromCenter(
           center: Offset(
             constraints.maxWidth / 2,
-            constraints.maxHeight * 0.42,
+            constraints.maxHeight * 0.4,
           ),
           width: cutoutSize,
           height: cutoutSize,
@@ -35,7 +40,7 @@ class CameraOverlay extends StatelessWidget {
               left: 24,
               right: 24,
               child: const Text(
-                'Position lesion within frame',
+                'Centre the lesion in the box and fill it',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Colors.white,

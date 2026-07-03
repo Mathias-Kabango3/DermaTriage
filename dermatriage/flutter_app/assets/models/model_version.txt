@@ -1,1 +1,1 @@
-v0.1.0-placeholder
+dermatriage-mobilenetv3s-distilled-5class-diverse-fp32
