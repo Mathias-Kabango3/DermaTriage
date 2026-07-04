@@ -15,6 +15,7 @@ import '../../providers/history_provider.dart';
 import '../../providers/patient_provider.dart';
 import '../../providers/triage_provider.dart';
 import '../../widgets/result/confidence_bar.dart';
+import '../../widgets/result/gradcam_overlay.dart';
 import '../../widgets/result/triage_badge.dart';
 
 /// Displays the triage outcome for the captured lesion image.
@@ -276,11 +277,15 @@ class _ResultScreenState extends State<ResultScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          // Captured photo.
+          // Captured photo with heatmap overlay.
           SizedBox(
             height: photoHeight,
             child: image != null
-                ? Image.file(image, fit: BoxFit.cover)
+                ? GradCAMOverlay(
+                    image: Image.file(image, fit: BoxFit.cover),
+                    heatmapPath: result.heatmapPath,
+                    isLoading: provider.heatmapLoading,
+                  )
                 : Container(
                     color: Colors.black12,
                     child: const Center(child: Text('No image')),

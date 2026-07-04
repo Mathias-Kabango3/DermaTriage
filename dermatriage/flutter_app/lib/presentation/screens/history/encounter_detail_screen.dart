@@ -8,6 +8,7 @@ import '../../../core/constants/triage_levels.dart';
 import '../../../core/theme/colors.dart';
 import '../../../data/models/encounter.dart';
 import '../../widgets/result/disease_info_card.dart';
+import '../../widgets/result/gradcam_overlay.dart';
 import '../../widgets/result/triage_badge.dart';
 
 /// Read-only detail view for a saved encounter.
@@ -38,7 +39,10 @@ class EncounterDetailScreen extends StatelessWidget {
             SizedBox(
               height: photoHeight,
               child: photo != null && photo.existsSync()
-                  ? Image.file(photo, fit: BoxFit.cover)
+                  ? GradCAMOverlay(
+                      image: Image.file(photo, fit: BoxFit.cover),
+                      heatmapPath: encounter.heatmapPath,
+                    )
                   : Container(
                       color: Colors.black12,
                       child: const Center(child: Text('Photo unavailable')),
