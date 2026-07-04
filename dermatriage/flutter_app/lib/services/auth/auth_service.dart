@@ -19,9 +19,49 @@ class AuthService {
       : _auth = auth ?? FirebaseAuth.instance,
         _db = db ?? FirebaseFirestore.instance;
 
+  /// Sentinel returned by [signInWithGoogle] when the user dismisses the
+  /// Google account chooser (not an error — the UI should just do nothing).
+  static const String cancelled = '__cancelled__';
+
   /// Firestore collection of CHW profile documents.
   CollectionReference<Map<String, dynamic>> get _chws =>
       _db.collection('chws');
+
+  /// Sign in with a Google account and link it to Firebase Auth.
+  ///
+  /// Uses Firebase's web-based OAuth flow ([FirebaseAuth.signInWithProvider]),
+  /// which opens a browser tab instead of relying on Google Play Services — so
+  /// it also works on devices without GMS (e.g. Huawei).
+  ///
+  /// Returns null on success, [cancelled] if the CHW dismissed the browser, or
+  /// a friendly error message otherwise. Region/facility are left blank for
+  /// Google sign-ups; the CHW can fill them in on the Profile screen.
+  Future<String?> signInWithGoogle() async {
+    try {
+      final GoogleAuthProvider provider = GoogleAuthProvider();
+      final UserCredential cred = await _auth.signInWithProvider(provider);
+      final User user = cred.user!;
+
+      // Create/merge the CHW profile so the owner can see the account. Only
+      // fill fields we actually have from Google (don't clobber existing ones).
+      await _chws.doc(user.uid).set(<String, dynamic>{
+        'name': user.displayName ?? '',
+        'email': user.email ?? '',
+        'signInMethod': 'google',
+      }, SetOptions(merge: true));
+      return null;
+    } on FirebaseAuthException catch (e) {
+      // The user closing the browser surfaces as one of these codes.
+      if (e.code == 'canceled' ||
+          e.code == 'web-context-canceled' ||
+          e.code == 'user-cancelled') {
+        return cancelled;
+      }
+      return _authMessage(e);
+    } catch (_) {
+      return 'Google sign-in did not complete. Please try again.';
+    }
+  }
 
   /// Register a new CHW with email/password and store their profile.
   ///

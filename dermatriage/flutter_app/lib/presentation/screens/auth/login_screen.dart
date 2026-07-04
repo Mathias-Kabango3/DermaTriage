@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/colors.dart';
+import '../../../services/auth/auth_service.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/common/app_logo.dart';
 
@@ -25,12 +26,30 @@ class _LoginScreenState extends State<LoginScreen> {
 
   bool _obscurePassword = true;
   bool _submitting = false;
+  bool _googleSubmitting = false;
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  Future<void> _onGoogleSignIn() async {
+    setState(() => _googleSubmitting = true);
+    final String? error =
+        await AuthProvider.instance.service.signInWithGoogle();
+    if (!mounted) return;
+    setState(() => _googleSubmitting = false);
+
+    if (error == null) {
+      context.go('/');
+    } else if (error != AuthService.cancelled) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(error)),
+      );
+    }
+    // AuthService.cancelled => the CHW dismissed the chooser; do nothing.
   }
 
   Future<void> _onLogin() async {
@@ -142,6 +161,37 @@ class _LoginScreenState extends State<LoginScreen> {
                         : const Icon(Icons.login),
                     label: Text(_submitting ? 'Signing in...' : 'Log In'),
                     onPressed: _submitting ? null : _onLogin,
+                  ),
+                  const SizedBox(height: 16),
+                  const Row(
+                    children: <Widget>[
+                      Expanded(child: Divider()),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 12),
+                        child: Text('or',
+                            style: TextStyle(color: AppColors.textSecondary)),
+                      ),
+                      Expanded(child: Divider()),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  OutlinedButton.icon(
+                    icon: _googleSubmitting
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.g_mobiledata, size: 28),
+                    label: Text(_googleSubmitting
+                        ? 'Please wait...'
+                        : 'Continue with Google'),
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size.fromHeight(48),
+                      foregroundColor: AppColors.textPrimary,
+                    ),
+                    onPressed:
+                        _googleSubmitting ? null : _onGoogleSignIn,
                   ),
                   const SizedBox(height: 12),
                   Text(

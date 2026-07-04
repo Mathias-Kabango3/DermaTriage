@@ -12,7 +12,20 @@
           "package_name": "com.example.dermatriage"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "914422888140-o4f0b8rjrbfuvv3nivjj9o9cb5eku304.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.dermatriage",
+            "certificate_hash": "09852970a715c56782c6491c4d1b880027f726e0"
+          }
+        },
+        {
+          "client_id": "914422888140-uppm8rjvivrhpjra56vlm2pimt3bk99i.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDJ6ncWO-kG1ud1XiQlt6TkFOQ3ZMwLDds"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "914422888140-uppm8rjvivrhpjra56vlm2pimt3bk99i.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "914422888140-9gcrrtf6cd8ogafskeq2s8jeb46h5o5k.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.dermatriage"
+              }
+            }
+          ]
         }
       }
     }
