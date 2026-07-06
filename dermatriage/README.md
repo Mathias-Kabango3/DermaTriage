@@ -150,6 +150,38 @@ A Flutter Android application provides the CHW-facing interface.
 
 **Critical implementation note — preprocessing must match training exactly:** resize to 224×224, scale to `[0,1]` (divide by 255), then normalise with ImageNet mean `[0.485, 0.456, 0.406]` and std `[0.229, 0.224, 0.225]`. The model's class index order is fixed: `0=Fungal, 1=Scabies, 2=Eczema, 3=healthy_skin, 4=not_skin`. Any mismatch in preprocessing or class order will silently corrupt predictions. See `deployment_info.json` produced by the conversion notebook.
 
+### Real-Device Testing
+
+The app was tested on four low-to-mid-range Android phones — representative of the inexpensive hardware CHWs are likely to use in the field. All screenshots below were captured on-device.
+
+#### Device 1 — Itel P55 · Android v13 · 4 GB RAM
+
+<p align="left">
+  <img src="screenshots/D11.jpeg" width="200" alt="Itel P55 — screenshot 1"/>
+  <img src="screenshots/D12.jpeg" width="200" alt="Itel P55 — screenshot 2"/>
+  <img src="screenshots/D13.jpeg" width="200" alt="Itel P55 — screenshot 3"/>
+  <img src="screenshots/D14.jpeg" width="200" alt="Itel P55 — screenshot 4"/>
+</p>
+
+#### Device 2 — Samsung 32 · 4 GB RAM
+
+<p align="left">
+  <img src="screenshots/D21.jpeg" width="200" alt="Samsung 32 — screenshot 1"/>
+</p>
+
+#### Device 3 — Huawei · EMUI v12 · 6 GB RAM
+
+<p align="left">
+  <img src="screenshots/D31.jpeg" width="200" alt="Huawei EMUI 12 — screenshot 1"/>
+  <img src="screenshots/D32.jpeg" width="200" alt="Huawei EMUI 12 — screenshot 2"/>
+</p>
+
+#### Device 4 — Oppo A3x · 4 GB RAM
+
+<p align="left">
+  <img src="screenshots/D41.jpeg" width="200" alt="Oppo A3x — screenshot 1"/>
+</p>
+
 ---
 
 ## Setup & Installation
@@ -242,5 +274,3 @@ DermaTriage is a **decision-support prototype**, not a medical device. It is int
 - Open-source communities behind PyTorch, TorchVision, TensorFlow Lite, and Flutter.
 
 ---
-
-*This project was completed as a BSc Software Engineering capstone at the African Leadership University. It is released for academic and educational purposes; see the licence file for terms.*
