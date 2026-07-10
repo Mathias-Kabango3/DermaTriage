@@ -16,6 +16,14 @@ A walkthrough of the DermaTriage app in action:
 
 ---
 
+## Download the App
+
+📱 **[Download DermaTriage APK](release/DermaTriage.apk?raw=true)** (~158 MB, Android)
+
+Install on an Android device by enabling "Install from unknown sources" and opening the downloaded `.apk`. The bundled model runs entirely on-device; an internet connection is only needed for the first login.
+
+---
+
 ## Table of Contents
 1. [Motivation](#motivation)
 2. [Key Features](#key-features)
