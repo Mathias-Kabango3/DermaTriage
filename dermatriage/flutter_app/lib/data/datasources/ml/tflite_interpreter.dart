@@ -1,4 +1,5 @@
 import 'dart:developer' as developer;
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:tflite_flutter/tflite_flutter.dart';
@@ -27,11 +28,16 @@ class SkinTriageInterpreter {
   /// Idempotent: a no-op once loaded. Rethrows any load/allocation failure so
   /// the caller can surface a meaningful message instead of a later null-check
   /// crash. Wraps the underlying error with the model path for context.
-  Future<void> load() async {
+  ///
+  /// [modelFile] overrides the bundled asset. It exists so parity tests can put
+  /// a different checkpoint through this exact code path; production always
+  /// uses the asset.
+  Future<void> load({File? modelFile}) async {
     if (_interpreter != null) return;
     try {
-      final Interpreter interpreter =
-          await Interpreter.fromAsset(AppConstants.modelAssetPath);
+      final Interpreter interpreter = modelFile != null
+          ? Interpreter.fromFile(modelFile)
+          : await Interpreter.fromAsset(AppConstants.modelAssetPath);
       _interpreter = interpreter;
       interpreter.allocateTensors();
 

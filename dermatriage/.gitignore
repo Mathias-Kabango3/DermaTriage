@@ -1,3 +1,10 @@
 PASSION_MICCAI_2024/
+PASSION_MICCAI_2024.zip
 KAGGLE_SETUP.md
 config_kaggle.yaml
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/

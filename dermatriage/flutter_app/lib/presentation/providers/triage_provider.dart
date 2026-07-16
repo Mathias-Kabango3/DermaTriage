@@ -19,16 +19,11 @@ class TriageProvider extends ChangeNotifier {
   TriageResult? _result;
   File? _capturedImage;
   String? _error;
-  bool _heatmapLoading = false;
 
   TriageState get state => _state;
   TriageResult? get result => _result;
   File? get capturedImage => _capturedImage;
   String? get error => _error;
-
-  /// True while the "region of interest" heatmap is being computed in the
-  /// background, after a diagnosis has already been shown.
-  bool get heatmapLoading => _heatmapLoading;
 
   /// Load the on-device model. Safe to call once at startup.
   ///
@@ -68,36 +63,10 @@ class TriageProvider extends ChangeNotifier {
     try {
       _result = await _inferenceService.runTriage(image);
       _state = TriageState.done;
-      notifyListeners();
-      // Show the diagnosis immediately, then compute the explanation heatmap in
-      // the background. Rejection outcomes get no heatmap.
-      await _generateHeatmap(image);
-      return;
     } catch (e) {
       _error = e.toString();
       _state = TriageState.error;
     }
-    notifyListeners();
-  }
-
-  /// Best-effort: generate the region-of-interest heatmap for a diagnosis and
-  /// attach it to the current result. Never throws into the UI.
-  Future<void> _generateHeatmap(File image) async {
-    final TriageResult? result = _result;
-    if (result == null || !result.isDiagnosis) return;
-
-    _heatmapLoading = true;
-    notifyListeners();
-
-    final String? path = await _inferenceService.generateSaliencyMap(
-      image,
-      result.predictedClassIndex,
-    );
-
-    // The run may have been reset while we were computing.
-    if (_result != result) return;
-    if (path != null) _result = result.copyWith(heatmapPath: path);
-    _heatmapLoading = false;
     notifyListeners();
   }
 
@@ -107,7 +76,6 @@ class TriageProvider extends ChangeNotifier {
     _result = null;
     _capturedImage = null;
     _error = null;
-    _heatmapLoading = false;
     notifyListeners();
   }
 

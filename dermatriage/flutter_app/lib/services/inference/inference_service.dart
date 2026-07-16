@@ -2,14 +2,10 @@ import 'dart:developer' as developer;
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
-
 import '../../core/constants/disease_classes.dart';
 import '../../core/constants/triage_levels.dart';
 import '../../data/datasources/ml/disease_class_mapper.dart';
 import '../../data/datasources/ml/image_processor.dart';
-import '../../data/datasources/ml/occlusion_saliency.dart';
 import '../../data/datasources/ml/tflite_interpreter.dart';
 import '../../data/models/triage_result.dart';
 
@@ -93,37 +89,6 @@ class InferenceService {
         'outcome=${pred.outcome.name}');
 
     developer.log(b.toString(), name: 'DermaTriageDebug');
-  }
-
-  /// Generate an occlusion-based saliency heatmap explaining [targetClassIndex]
-  /// for [imageFile], fully on-device. Writes a PNG into the app's documents
-  /// directory and returns its path, or null if no heatmap could be produced.
-  Future<String?> generateSaliencyMap(
-    File imageFile,
-    int targetClassIndex,
-  ) async {
-    try {
-      final bytes = await imageFile.readAsBytes();
-      final Float32List base = ImageProcessor.preprocess(bytes);
-
-      final Uint8List? png = await OcclusionSaliency().generate(
-        base: base,
-        predict: _interpreter.predict,
-        targetIndex: targetClassIndex,
-      );
-      if (png == null) return null;
-
-      final Directory dir = await getApplicationDocumentsDirectory();
-      final String path = p.join(
-        dir.path,
-        'heatmap_${DateTime.now().millisecondsSinceEpoch}.png',
-      );
-      await File(path).writeAsBytes(png);
-      return path;
-    } catch (_) {
-      // Explainability is best-effort: a failure here must never block triage.
-      return null;
-    }
   }
 
   /// A short label for a non-diagnostic outcome (used for storage/debugging;
