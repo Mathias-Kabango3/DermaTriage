@@ -2,157 +2,61 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-import '../../../core/constants/app_constants.dart';
-import '../../../core/theme/colors.dart';
+import '../../../core/theme/app_shadows.dart';
 import '../../providers/auth_provider.dart';
-import '../../widgets/common/app_logo.dart';
+import '../../widgets/common/app_bottom_nav.dart';
+import '../../widgets/home/action_card.dart';
+import '../../widgets/home/brand_header.dart';
 
 /// Landing screen: branding and primary actions.
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
-  Future<void> _confirmLogout(BuildContext context) async {
-    final bool? confirmed = await showDialog<bool>(
-      context: context,
-      builder: (BuildContext ctx) => AlertDialog(
-        title: const Text('Log out?'),
-        content: const Text('You will need to sign in again to continue.'),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Log out'),
-          ),
-        ],
-      ),
-    );
-    if (confirmed == true) {
-      // Router redirect returns to /login once the session clears.
-      AuthProvider.instance.logout();
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    final String? username =
-        context.watch<AuthProvider>().displayName;
+    final String? username = context.watch<AuthProvider>().displayName;
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(AppConstants.appName),
-        actions: <Widget>[
-          IconButton(
-            icon: const Icon(Icons.history),
-            tooltip: 'History',
-            onPressed: () => context.push('/history'),
-          ),
-          PopupMenuButton<String>(
-            tooltip: 'Account',
-            icon: const Icon(Icons.account_circle),
-            onSelected: (String value) {
-              switch (value) {
-                case 'settings':
-                  context.push('/settings');
-                  break;
-                case 'profile':
-                  context.push('/profile');
-                  break;
-                case 'logout':
-                  _confirmLogout(context);
-                  break;
-              }
-            },
-            itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-              if (username != null)
-                PopupMenuItem<String>(
-                  enabled: false,
-                  child: Text(
-                    'Signed in as $username',
-                    style: const TextStyle(color: AppColors.textSecondary),
+      body: Column(
+        children: <Widget>[
+          BrandHeader(username: username),
+          // Centred in the space between header and tab bar so two actions
+          // read as a balanced screen rather than a top-aligned stub; still
+          // scrollable on short displays.
+          Expanded(
+            child: LayoutBuilder(
+              builder: (BuildContext context, BoxConstraints constraints) {
+                return SingleChildScrollView(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                    child: Padding(
+                      padding: const EdgeInsets.all(AppSpacing.lg),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: <Widget>[
+                          ActionCard.primary(
+                            icon: Icons.camera_alt_rounded,
+                            label: 'Start New Triage',
+                            onTap: () => context.push('/patient/register'),
+                          ),
+                          const SizedBox(height: AppSpacing.md),
+                          ActionCard.secondary(
+                            icon: Icons.history_rounded,
+                            label: 'View History',
+                            onTap: () => context.go('/history'),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                ),
-              const PopupMenuItem<String>(
-                value: 'settings',
-                child: ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: Icon(Icons.settings),
-                  title: Text('Settings'),
-                ),
-              ),
-              const PopupMenuItem<String>(
-                value: 'profile',
-                child: ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: Icon(Icons.person_outline),
-                  title: Text('My profile'),
-                ),
-              ),
-              const PopupMenuItem<String>(
-                value: 'logout',
-                child: ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: Icon(Icons.logout),
-                  title: Text('Log out'),
-                ),
-              ),
-            ],
+                );
+              },
+            ),
           ),
         ],
       ),
-      body: SafeArea(
-        child: Column(
-          children: <Widget>[
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    const SizedBox(height: 24),
-                    // Logo / title area.
-                    const AppLogo(size: 96),
-                    const SizedBox(height: 16),
-                    Text(
-                      AppConstants.appName,
-                      style: Theme.of(context)
-                          .textTheme
-                          .headlineMedium
-                          ?.copyWith(
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.bold,
-                          ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Offline AI-assisted skin triage',
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodyMedium
-                          ?.copyWith(color: AppColors.textSecondary),
-                    ),
-                    const SizedBox(height: 48),
-                    // Primary action.
-                    ElevatedButton.icon(
-                      icon: const Icon(Icons.camera_alt),
-                      label: const Text('Start New Triage'),
-                      onPressed: () => context.push('/patient/register'),
-                    ),
-                    const SizedBox(height: 12),
-                    // Secondary action.
-                    TextButton.icon(
-                      icon: const Icon(Icons.history),
-                      label: const Text('View History'),
-                      onPressed: () => context.push('/history'),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+      bottomNavigationBar: const AppBottomNav(current: AppTab.home),
     );
   }
 }

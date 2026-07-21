@@ -19,6 +19,10 @@ class TriageResult {
   final String? heatmapPath;
   final DateTime timestamp;
 
+  /// End-to-end on-device inference time in milliseconds (preprocess + model
+  /// run). Transient — measured at runtime and shown to the CHW; not persisted.
+  final int? inferenceMs;
+
   const TriageResult({
     required this.predictedClassIndex,
     required this.predictedClassId,
@@ -29,6 +33,7 @@ class TriageResult {
     required this.allLogits,
     this.heatmapPath,
     required this.timestamp,
+    this.inferenceMs,
   });
 
   /// Whether this prediction is a real diagnosis (vs. a rejection outcome).
@@ -47,6 +52,7 @@ class TriageResult {
       allLogits: allLogits,
       heatmapPath: heatmapPath ?? this.heatmapPath,
       timestamp: timestamp,
+      inferenceMs: inferenceMs,
     );
   }
 

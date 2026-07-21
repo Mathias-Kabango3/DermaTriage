@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/colors.dart';
 import '../../providers/auth_provider.dart';
+import '../../widgets/common/app_bottom_nav.dart';
 
 /// Lets a signed-in CHW manage their account: display name, region, facility,
 /// email and password.
@@ -131,9 +133,64 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 _buildEmailCard(context),
                 const SizedBox(height: 16),
                 _buildPasswordCard(context),
+                const SizedBox(height: 16),
+                _buildAccountCard(context),
               ],
             ),
+      bottomNavigationBar: const AppBottomNav(current: AppTab.profile),
     );
+  }
+
+  /// Settings and Log out, moved here from the old home-screen account menu
+  /// when the header icons were replaced by the bottom tab bar.
+  Widget _buildAccountCard(BuildContext context) {
+    return _Card(
+      title: 'Account',
+      child: Column(
+        children: <Widget>[
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: const Icon(Icons.settings_rounded,
+                color: AppColors.textSecondary),
+            title: const Text('Settings'),
+            trailing: const Icon(Icons.chevron_right_rounded,
+                color: AppColors.textSecondary),
+            onTap: () => context.push('/settings'),
+          ),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: const Icon(Icons.logout_rounded, color: AppColors.urgent),
+            title: const Text('Log out',
+                style: TextStyle(color: AppColors.urgent)),
+            onTap: () => _confirmLogout(context),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _confirmLogout(BuildContext context) async {
+    final bool? confirmed = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext ctx) => AlertDialog(
+        title: const Text('Log out?'),
+        content: const Text('You will need to sign in again to continue.'),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Log out'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) {
+      // Router redirect returns to /login once the session clears.
+      AuthProvider.instance.logout();
+    }
   }
 
   Widget _buildProfileCard(BuildContext context) {

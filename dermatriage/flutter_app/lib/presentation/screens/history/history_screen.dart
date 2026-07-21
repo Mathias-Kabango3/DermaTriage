@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../../core/theme/colors.dart';
 import '../../../data/models/encounter.dart';
 import '../../providers/history_provider.dart';
+import '../../widgets/common/app_bottom_nav.dart';
 import '../../widgets/history/encounter_tile.dart';
 import 'encounter_detail_screen.dart';
 
@@ -58,6 +59,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
           );
         },
       ),
+      bottomNavigationBar: const AppBottomNav(current: AppTab.history),
     );
   }
 

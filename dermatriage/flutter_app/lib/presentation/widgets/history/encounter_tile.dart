@@ -48,11 +48,14 @@ class EncounterTile extends StatelessWidget {
               children: <Widget>[
                 _miniBadge(level),
                 const SizedBox(width: 8),
-                Text(
-                  '$percent% confidence',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: AppColors.textSecondary,
+                Flexible(
+                  child: Text(
+                    '$percent% confidence',
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: AppColors.textSecondary,
+                    ),
                   ),
                 ),
               ],

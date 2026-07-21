@@ -19,6 +19,10 @@ class AppConstants {
   /// diagnosis. Below this the CHW is asked to retake the photo.
   static const double confidenceThreshold = 0.50;
 
+  /// Target for on-device inference latency (preprocess + model run). The app
+  /// flags any run over this budget so the <2 s requirement is verifiable.
+  static const int inferenceBudgetMs = 2000;
+
   // Local database
   static const String databaseName = 'dermatriage.db';
   // v2 adds the offline `users` table for CHW authentication.

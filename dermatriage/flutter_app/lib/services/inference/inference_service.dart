@@ -30,11 +30,20 @@ class InferenceService {
     await _interpreter.load();
 
     final bytes = await imageFile.readAsBytes();
+
+    // Time the on-device inference: preprocessing + model run. File I/O above is
+    // excluded so this reflects the compute the <2 s requirement targets.
+    final Stopwatch stopwatch = Stopwatch()..start();
     final input = ImageProcessor.preprocess(bytes);
     final List<double> logits = _interpreter.predict(input);
+    stopwatch.stop();
+    final int inferenceMs = stopwatch.elapsedMilliseconds;
+
     final TriagePrediction pred = DiseaseClassMapper.mapLogits(logits);
 
     _logInferenceDebug(input, logits, pred);
+    developer.log('On-device inference: ${inferenceMs}ms '
+        '(model run ${_interpreter.lastLatencyMs}ms)', name: 'DermaTriageDebug');
 
     return TriageResult(
       predictedClassIndex: pred.classIndex,
@@ -48,6 +57,7 @@ class InferenceService {
       allLogits: logits,
       heatmapPath: null,
       timestamp: DateTime.now(),
+      inferenceMs: inferenceMs,
     );
   }
 

@@ -15,6 +15,7 @@ import '../../providers/history_provider.dart';
 import '../../providers/patient_provider.dart';
 import '../../providers/triage_provider.dart';
 import '../../widgets/result/confidence_bar.dart';
+import '../../widgets/result/inference_time_chip.dart';
 import '../../widgets/result/triage_badge.dart';
 
 /// Displays the triage outcome for the captured lesion image.
@@ -195,6 +196,10 @@ class _ResultScreenState extends State<ResultScreen> {
               color: AppColors.textSecondary,
             ),
           ),
+          if (result.inferenceMs != null) ...<Widget>[
+            const SizedBox(height: 20),
+            Center(child: InferenceTimeChip(inferenceMs: result.inferenceMs!)),
+          ],
           const SizedBox(height: 28),
           ElevatedButton.icon(
             icon: const Icon(Icons.camera_alt),
@@ -299,6 +304,13 @@ class _ResultScreenState extends State<ResultScreen> {
                   confidence: result.confidence,
                   color: level.color,
                 ),
+                if (result.inferenceMs != null) ...<Widget>[
+                  const SizedBox(height: 12),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: InferenceTimeChip(inferenceMs: result.inferenceMs!),
+                  ),
+                ],
                 const SizedBox(height: 20),
                 // CHW notes.
                 TextField(
