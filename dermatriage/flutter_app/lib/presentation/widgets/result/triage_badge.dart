@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/constants/triage_levels.dart';
+import '../../../l10n/app_localizations.dart';
 
 /// Prominent coloured badge communicating the triage outcome.
 class TriageBadge extends StatelessWidget {
@@ -42,7 +43,7 @@ class TriageBadge extends StatelessWidget {
           const SizedBox(width: 12),
           Flexible(
             child: Text(
-              level.displayLabel.toUpperCase(),
+              AppLocalizations.of(context).triageLabel(level.id).toUpperCase(),
               textAlign: TextAlign.center,
               style: const TextStyle(
                 color: Colors.white,

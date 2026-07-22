@@ -1,34 +1,52 @@
 import 'dart:io';
 
 import 'package:camera/camera.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/constants/body_regions.dart';
 import '../../../core/theme/colors.dart';
 import '../../../l10n/app_localizations.dart';
-import '../../providers/triage_provider.dart';
+import '../../providers/auth_provider.dart';
+import '../../providers/contribution_provider.dart';
 import '../../widgets/camera/camera_overlay.dart';
 import '../../widgets/camera/capture_button.dart';
 
-/// Live camera capture screen for photographing a skin lesion.
-class CameraScreen extends StatefulWidget {
-  const CameraScreen({super.key});
+/// Camera capture for the healthy-skin contribution flow. Deliberately a
+/// separate widget/file from [CameraScreen] — same underlying `camera`
+/// package plumbing, but its own state, so nothing here can regress the
+/// tested triage capture path.
+///
+/// Metadata (Fitzpatrick type + body region) is already chosen on the
+/// previous screen and passed in directly, matching how
+/// [ContributionMetadataScreen] hands off — see that file's docstring for why
+/// this isn't wired through named go_router routes.
+class ContributionCameraScreen extends StatefulWidget {
+  final int fitzpatrickType;
+  final BodyRegion bodyRegion;
+
+  const ContributionCameraScreen({
+    super.key,
+    required this.fitzpatrickType,
+    required this.bodyRegion,
+  });
 
   @override
-  State<CameraScreen> createState() => _CameraScreenState();
+  State<ContributionCameraScreen> createState() =>
+      _ContributionCameraScreenState();
 }
 
-class _CameraScreenState extends State<CameraScreen>
+class _ContributionCameraScreenState extends State<ContributionCameraScreen>
     with WidgetsBindingObserver {
   CameraController? _controller;
   List<CameraDescription> _cameras = <CameraDescription>[];
   int _cameraIndex = 0;
-  String? _unavailableReason; // non-null => show the unavailable view
-  bool _permissionIssue = false; // true => offer "Open App Settings"
+  String? _unavailableReason;
+  bool _permissionIssue = false;
   bool _flashOn = false;
   bool _capturing = false;
 
@@ -74,7 +92,6 @@ class _CameraScreenState extends State<CameraScreen>
       _setUnavailable(l10n.cameraPermission, permission: true);
       return;
     }
-
     _cameras = await availableCameras();
     if (_cameras.isEmpty) {
       _setUnavailable(l10n.noCamera, permission: false);
@@ -121,9 +138,7 @@ class _CameraScreenState extends State<CameraScreen>
 
   Future<void> _capture() async {
     final CameraController? controller = _controller;
-    if (controller == null ||
-        !controller.value.isInitialized ||
-        _capturing) {
+    if (controller == null || !controller.value.isInitialized || _capturing) {
       return;
     }
 
@@ -132,16 +147,64 @@ class _CameraScreenState extends State<CameraScreen>
       final XFile shot = await controller.takePicture();
       final Directory dir = await getApplicationDocumentsDirectory();
       final String fileName =
-          'capture_${DateTime.now().millisecondsSinceEpoch}.jpg';
+          'contribution_${DateTime.now().millisecondsSinceEpoch}.jpg';
       final String savedPath = p.join(dir.path, fileName);
       await shot.saveTo(savedPath);
-
       if (!mounted) return;
-      context.read<TriageProvider>().setCapturedImage(File(savedPath));
-      // Await the result route so capture is re-enabled when the CHW returns
-      // here (e.g. via "Retake Photo" after a rejection).
-      await context.push('/result');
-      if (mounted) setState(() => _capturing = false);
+
+      final String? uid = AuthProvider.instance.user?.uid;
+      if (uid == null) {
+        // The router already gates every screen behind login, so this is
+        // defensive only — it should never actually happen.
+        throw StateError('No signed-in CHW to attribute this contribution to.');
+      }
+      String facility = '';
+      try {
+        final profile = await AuthProvider.instance.service.loadProfile();
+        facility = (profile['facility'] as String?) ?? '';
+      } catch (_) {
+        // Offline with nothing cached yet — submit with facility blank rather
+        // than block the capture; it's optional metadata, not a blocker.
+      }
+      if (!mounted) return;
+
+      await context.read<ContributionProvider>().submit(
+            localPhotoPath: savedPath,
+            fitzpatrickType: widget.fitzpatrickType,
+            bodyRegion: widget.bodyRegion,
+            contributorId: uid,
+            facility: facility,
+          );
+      if (!mounted) return;
+
+      final List<ConnectivityResult> connectivity =
+          await Connectivity().checkConnectivity();
+      final bool isOnline = !connectivity.contains(ConnectivityResult.none);
+      if (!mounted) return;
+
+      final AppLocalizations l10n = AppLocalizations.of(context);
+      await showDialog<void>(
+        context: context,
+        builder: (BuildContext ctx) => AlertDialog(
+          title: Text(l10n.contributionSavedTitle),
+          content: Text(
+            isOnline
+                ? l10n.contributionSavedMessageOnline
+                : l10n.contributionSavedMessageOffline,
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: Text(l10n.cancel),
+            ),
+          ],
+        ),
+      );
+      if (!mounted) return;
+      // Back to the metadata screen and then Home — done contributing for now.
+      Navigator.of(context)
+        ..pop()
+        ..pop();
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -161,7 +224,7 @@ class _CameraScreenState extends State<CameraScreen>
         message: _unavailableReason!,
         showSettings: _permissionIssue,
         onRetry: _setup,
-        onBack: () => context.pop(),
+        onBack: () => Navigator.of(context).pop(),
       );
     }
 
@@ -178,16 +241,17 @@ class _CameraScreenState extends State<CameraScreen>
       body: Stack(
         fit: StackFit.expand,
         children: <Widget>[
-          // Fill the whole screen with the live preview (cover, no black bars).
           _FullScreenPreview(controller: controller),
-          const CameraOverlay(fullFrame: true),
-          // Back button.
+          CameraOverlay(
+            guidanceText: AppLocalizations.of(context).contributionCameraGuidance,
+            fullFrame: true,
+          ),
           SafeArea(
             child: Align(
               alignment: Alignment.topLeft,
               child: IconButton(
                 icon: const Icon(Icons.arrow_back, color: Colors.white),
-                onPressed: () => context.pop(),
+                onPressed: () => Navigator.of(context).pop(),
               ),
             ),
           ),
@@ -206,36 +270,27 @@ class _CameraScreenState extends State<CameraScreen>
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: <Color>[Colors.transparent, Colors.black.withValues(alpha: 0.6)],
+            colors: <Color>[
+              Colors.transparent,
+              Colors.black.withValues(alpha: 0.6),
+            ],
           ),
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: <Widget>[
-                IconButton(
-                  icon: Icon(
-                    _flashOn ? Icons.flash_on : Icons.flash_off,
-                    color: Colors.white,
-                    size: 28,
-                  ),
-                  onPressed: _toggleFlash,
-                ),
-                CaptureButton(
-                  enabled: !_capturing,
-                  onPressed: _capture,
-                ),
-                IconButton(
-                  icon: const Icon(
-                    Icons.cameraswitch,
-                    color: Colors.white,
-                    size: 28,
-                  ),
-                  onPressed: _cameras.length < 2 ? null : _switchCamera,
-                ),
-              ],
+            IconButton(
+              icon: Icon(
+                _flashOn ? Icons.flash_on : Icons.flash_off,
+                color: Colors.white,
+                size: 28,
+              ),
+              onPressed: _toggleFlash,
+            ),
+            CaptureButton(enabled: !_capturing, onPressed: _capture),
+            IconButton(
+              icon: const Icon(Icons.cameraswitch, color: Colors.white, size: 28),
+              onPressed: _cameras.length < 2 ? null : _switchCamera,
             ),
           ],
         ),
@@ -244,8 +299,6 @@ class _CameraScreenState extends State<CameraScreen>
   }
 }
 
-/// Fills the screen with the camera preview using BoxFit.cover, so there are no
-/// black letterbox bars and the live view matches what gets captured.
 class _FullScreenPreview extends StatelessWidget {
   final CameraController controller;
 
@@ -255,13 +308,10 @@ class _FullScreenPreview extends StatelessWidget {
   Widget build(BuildContext context) {
     final Size? preview = controller.value.previewSize;
     if (preview == null) return CameraPreview(controller);
-
     return ClipRect(
       child: FittedBox(
         fit: BoxFit.cover,
         child: SizedBox(
-          // previewSize is reported in sensor (landscape) orientation; swap
-          // width/height for the portrait camera UI.
           width: preview.height,
           height: preview.width,
           child: CameraPreview(controller),
@@ -271,7 +321,6 @@ class _FullScreenPreview extends StatelessWidget {
   }
 }
 
-/// Shown when the camera can't be used (no camera or permission denied).
 class _CameraUnavailableView extends StatelessWidget {
   final String message;
   final bool showSettings;
@@ -301,31 +350,17 @@ class _CameraUnavailableView extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Icon(Icons.no_photography,
-                size: 64, color: AppColors.textSecondary),
+            const Icon(Icons.no_photography, size: 64, color: AppColors.textSecondary),
             const SizedBox(height: 16),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 16),
-            ),
+            Text(message, textAlign: TextAlign.center, style: const TextStyle(fontSize: 16)),
             const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: onRetry,
-              child: Text(l10n.tryAgain),
-            ),
+            ElevatedButton(onPressed: onRetry, child: Text(l10n.tryAgain)),
             if (showSettings) ...<Widget>[
               const SizedBox(height: 12),
-              TextButton(
-                onPressed: openAppSettings,
-                child: Text(l10n.openAppSettings),
-              ),
+              TextButton(onPressed: openAppSettings, child: Text(l10n.openAppSettings)),
             ],
             const SizedBox(height: 12),
-            TextButton(
-              onPressed: onBack,
-              child: Text(l10n.goBack),
-            ),
+            TextButton(onPressed: onBack, child: Text(l10n.goBack)),
           ],
         ),
       ),

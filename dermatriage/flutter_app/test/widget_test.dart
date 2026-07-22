@@ -1,5 +1,6 @@
 // Basic smoke test for the DermaTriage root widget.
 import 'package:dermatriage/main.dart';
+import 'package:dermatriage/presentation/providers/locale_provider.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -8,7 +9,7 @@ void main() {
   // Firebase app throws, so this smoke test is skipped until a Firebase test
   // harness (firebase_auth_mocks / fake setup) is wired up.
   testWidgets('App builds without throwing', (WidgetTester tester) async {
-    await tester.pumpWidget(const DermaTriage());
+    await tester.pumpWidget(DermaTriage(localeProvider: LocaleProvider()));
     expect(find.byType(DermaTriage), findsOneWidget);
   }, skip: true);
 }

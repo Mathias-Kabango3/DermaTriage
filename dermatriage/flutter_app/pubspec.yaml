@@ -9,6 +9,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  # Localization: English + Kinyarwanda (see lib/l10n/app_localizations.dart).
+  flutter_localizations:
+    sdk: flutter
 
   # Online authentication (CHW accounts). Auth happens online so the project
   # owner can track registered CHWs; Firebase persists the session locally so
@@ -45,13 +48,19 @@ dependencies:
 
   # Utilities
   uuid: ^4.2.1
-  intl: ^0.18.1
+  intl: ^0.20.2
+  connectivity_plus: ^7.3.0
+  # Healthy-skin contribution photo hosting (Cloudinary — Firebase Storage
+  # requires the Blaze billing plan even for the free tier's quota, see
+  # cloudinary_config.dart for why this project uses Cloudinary instead).
+  http: ^1.2.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.0
   flutter_launcher_icons: ^0.14.1
+  sqflite_common_ffi: ^2.4.2
 
 # App launcher icon (run: dart run flutter_launcher_icons).
 flutter_launcher_icons:

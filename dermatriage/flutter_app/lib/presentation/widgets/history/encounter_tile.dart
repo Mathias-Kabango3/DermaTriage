@@ -5,15 +5,19 @@ import '../../../core/constants/disease_classes.dart';
 import '../../../core/constants/triage_levels.dart';
 import '../../../core/theme/colors.dart';
 import '../../../data/models/encounter.dart';
+import '../../../data/models/patient.dart';
+import '../../../l10n/app_localizations.dart';
 
 /// List tile summarising a saved [Encounter].
 class EncounterTile extends StatelessWidget {
   final Encounter encounter;
+  final Patient? patient;
   final VoidCallback onTap;
 
   const EncounterTile({
     super.key,
     required this.encounter,
+    this.patient,
     required this.onTap,
   });
 
@@ -24,8 +28,14 @@ class EncounterTile extends StatelessWidget {
     final TriageLevel level =
         TriageLevelExtension.fromId(encounter.triageCategory);
     final int percent = (encounter.confidenceScore * 100).round();
+    final AppLocalizations l10n = AppLocalizations.of(context);
     final String date =
         DateFormat('d MMM yyyy, HH:mm').format(encounter.encounterDate);
+    final String? patientName = patient?.name;
+    final String patientLabel =
+        (patientName == null || patientName.isEmpty)
+            ? l10n.unknownPatient
+            : patientName;
 
     return Card(
       child: ListTile(
@@ -35,22 +45,23 @@ class EncounterTile extends StatelessWidget {
           child: Icon(Icons.medical_services_outlined, color: level.color),
         ),
         title: Text(
-          displayName,
+          patientLabel,
           style: const TextStyle(fontWeight: FontWeight.w600),
         ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             const SizedBox(height: 4),
+            Text(displayName, style: const TextStyle(fontSize: 13)),
             Text(date, style: const TextStyle(fontSize: 12)),
             const SizedBox(height: 6),
             Row(
               children: <Widget>[
-                _miniBadge(level),
+                _miniBadge(level, l10n),
                 const SizedBox(width: 8),
                 Flexible(
                   child: Text(
-                    '$percent% confidence',
+                    l10n.confidencePercent(percent),
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       fontSize: 12,
@@ -68,7 +79,7 @@ class EncounterTile extends StatelessWidget {
     );
   }
 
-  Widget _miniBadge(TriageLevel level) {
+  Widget _miniBadge(TriageLevel level, AppLocalizations l10n) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
@@ -76,7 +87,7 @@ class EncounterTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
-        level.displayLabel.toUpperCase(),
+        l10n.triageLabel(level.id).toUpperCase(),
         style: const TextStyle(
           color: Colors.white,
           fontSize: 10,

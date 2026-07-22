@@ -2,29 +2,56 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-/// A dark scrim with a clear rounded-rectangle cutout marking the lesion
+/// A dark scrim with a clear rounded-rectangle cutout marking the capture
 /// target zone, plus guidance text below it.
 class CameraOverlay extends StatelessWidget {
-  const CameraOverlay({super.key});
+  /// Guidance text shown below the cutout. Defaults to the triage-capture
+  /// wording; the contribution capture flow overrides it (no "lesion").
+  final String guidanceText;
+
+  /// Both the triage and contribution capture screens currently pass
+  /// `true` — the model does a direct squash-resize to 224x224 with no
+  /// centre-crop (see `ImageProcessor.preprocess`), so there's no technical
+  /// reason the guide has to be a small square. The tight-square layout
+  /// (`false`, the default) is kept available rather than deleted, in case
+  /// a tighter close-up guide is wanted again for either screen later.
+  final bool fullFrame;
+
+  const CameraOverlay({
+    super.key,
+    this.guidanceText = 'Centre the lesion in the box and fill it',
+    this.fullFrame = false,
+  });
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
-        // A large centred square matching the region the model analyses
-        // (the centre crop of the captured photo).
-        final double cutoutSize = math.min(
-          constraints.maxWidth * 0.88,
-          constraints.maxHeight * 0.6,
-        );
-        final Rect cutout = Rect.fromCenter(
-          center: Offset(
-            constraints.maxWidth / 2,
-            constraints.maxHeight * 0.4,
-          ),
-          width: cutoutSize,
-          height: cutoutSize,
-        );
+        final Rect cutout;
+        if (fullFrame) {
+          // Nearly the entire viewfinder — just enough margin to keep the
+          // white border on-screen and leave room for the guidance text.
+          cutout = Rect.fromLTWH(
+            constraints.maxWidth * 0.03,
+            constraints.maxHeight * 0.04,
+            constraints.maxWidth * 0.94,
+            constraints.maxHeight * 0.78,
+          );
+        } else {
+          // A large centred square — a tighter, close-up framing guide.
+          final double cutoutSize = math.min(
+            constraints.maxWidth * 0.88,
+            constraints.maxHeight * 0.6,
+          );
+          cutout = Rect.fromCenter(
+            center: Offset(
+              constraints.maxWidth / 2,
+              constraints.maxHeight * 0.4,
+            ),
+            width: cutoutSize,
+            height: cutoutSize,
+          );
+        }
 
         return Stack(
           children: <Widget>[
@@ -39,10 +66,10 @@ class CameraOverlay extends StatelessWidget {
               top: cutout.bottom + 16,
               left: 24,
               right: 24,
-              child: const Text(
-                'Centre the lesion in the box and fill it',
+              child: Text(
+                guidanceText,
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 16,
                   fontWeight: FontWeight.w600,

@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 
 import '../../../core/theme/colors.dart';
 import '../../../data/models/encounter.dart';
+import '../../../data/models/patient.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../providers/history_provider.dart';
 import '../../widgets/common/app_bottom_nav.dart';
 import '../../widgets/history/encounter_tile.dart';
@@ -25,10 +27,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
     });
   }
 
-  void _openDetail(Encounter encounter) {
+  void _openDetail(Encounter encounter, Patient? patient) {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) => EncounterDetailScreen(encounter: encounter),
+        builder: (_) =>
+            EncounterDetailScreen(encounter: encounter, patient: patient),
       ),
     );
   }
@@ -36,7 +39,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Encounter History')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context).historyTitle)),
       body: Consumer<HistoryProvider>(
         builder: (BuildContext context, HistoryProvider provider, _) {
           final List<Encounter> encounters = provider.encounters;
@@ -50,9 +53,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
               itemCount: encounters.length,
               itemBuilder: (BuildContext context, int index) {
                 final Encounter e = encounters[index];
+                final Patient? patient = provider.patientFor(e.patientId);
                 return EncounterTile(
                   encounter: e,
-                  onTap: () => _openDetail(e),
+                  patient: patient,
+                  onTap: () => _openDetail(e, patient),
                 );
               },
             ),
@@ -71,9 +76,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
           Icon(Icons.inbox_outlined,
               size: 72, color: AppColors.textSecondary.withValues(alpha: 0.5)),
           const SizedBox(height: 16),
-          const Text(
-            'No encounters recorded yet',
-            style: TextStyle(fontSize: 16, color: AppColors.textSecondary),
+          Text(
+            AppLocalizations.of(context).historyEmpty,
+            style: const TextStyle(fontSize: 16, color: AppColors.textSecondary),
           ),
         ],
       ),

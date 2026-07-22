@@ -7,17 +7,25 @@ import '../../../core/constants/disease_classes.dart';
 import '../../../core/constants/triage_levels.dart';
 import '../../../core/theme/colors.dart';
 import '../../../data/models/encounter.dart';
+import '../../../data/models/patient.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../widgets/result/disease_info_card.dart';
 import '../../widgets/result/triage_badge.dart';
 
 /// Read-only detail view for a saved encounter.
 class EncounterDetailScreen extends StatelessWidget {
   final Encounter encounter;
+  final Patient? patient;
 
-  const EncounterDetailScreen({super.key, required this.encounter});
+  const EncounterDetailScreen({
+    super.key,
+    required this.encounter,
+    this.patient,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     final DiseaseClass? disease = getDiseaseById(encounter.predictedClass);
     final TriageLevel level =
         TriageLevelExtension.fromId(encounter.triageCategory);
@@ -30,7 +38,7 @@ class EncounterDetailScreen extends StatelessWidget {
     final double photoHeight = MediaQuery.of(context).size.height * 0.4;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Encounter Detail')),
+      appBar: AppBar(title: Text(l10n.detailTitle)),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -41,7 +49,7 @@ class EncounterDetailScreen extends StatelessWidget {
                   ? Image.file(photo, fit: BoxFit.cover)
                   : Container(
                       color: Colors.black12,
-                      child: const Center(child: Text('Photo unavailable')),
+                      child: Center(child: Text(l10n.photoUnavailable)),
                     ),
             ),
             Padding(
@@ -49,6 +57,29 @@ class EncounterDetailScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
+                  Text(
+                    (patient?.name.isNotEmpty ?? false)
+                        ? patient!.name
+                        : l10n.unknownPatient,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  if (patient != null) ...<Widget>[
+                    const SizedBox(height: 4),
+                    Text(
+                      <String>[
+                        l10n.sexLabel(patient!.sex),
+                        if (patient!.approximateAge != null)
+                          l10n.approxAgeYears(patient!.approximateAge!),
+                        if (patient!.location.isNotEmpty) patient!.location,
+                      ].join(' · '),
+                      style: const TextStyle(
+                          color: AppColors.textSecondary, fontSize: 13),
+                    ),
+                  ],
+                  const SizedBox(height: 8),
                   Text(date,
                       style: const TextStyle(
                           color: AppColors.textSecondary, fontSize: 13)),
@@ -57,7 +88,7 @@ class EncounterDetailScreen extends StatelessWidget {
                   const SizedBox(height: 16),
                   Text(
                     '${disease?.displayName ?? encounter.predictedClass} '
-                    '— $percent% confidence',
+                    '— ${l10n.confidencePercent(percent)}',
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
@@ -68,9 +99,9 @@ class EncounterDetailScreen extends StatelessWidget {
                   const SizedBox(height: 16),
                   if (encounter.chwNotes != null &&
                       encounter.chwNotes!.isNotEmpty) ...<Widget>[
-                    const Text(
-                      'CHW Notes',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                    Text(
+                      l10n.chwNotes,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 4),
                     Text(encounter.chwNotes!),

@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/colors.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../providers/auth_provider.dart';
 
 /// Account creation for a new community health worker.
@@ -63,37 +64,38 @@ class _RegisterScreenState extends State<RegisterScreen> {
     // Registration signs the CHW in automatically; the router redirect sends
     // them to the home screen once the session updates.
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Account created. Welcome!')),
+      SnackBar(content: Text(AppLocalizations.of(context).accountCreated)),
     );
     context.go('/');
   }
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('Create Account')),
+      appBar: AppBar(title: Text(l10n.createAccount)),
       body: Form(
         key: _formKey,
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: <Widget>[
-            _sectionLabel(context, 'Your name'),
+            _sectionLabel(context, l10n.yourNameHint),
             TextFormField(
               controller: _nameController,
               textInputAction: TextInputAction.next,
               textCapitalization: TextCapitalization.words,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                hintText: 'Full name',
-                prefixIcon: Icon(Icons.badge_outlined),
+              decoration: InputDecoration(
+                border: const OutlineInputBorder(),
+                hintText: l10n.fullName,
+                prefixIcon: const Icon(Icons.badge_outlined),
               ),
               validator: (String? v) => (v == null || v.trim().isEmpty)
-                  ? 'Please enter your name'
+                  ? l10n.enterName
                   : null,
             ),
             const SizedBox(height: 20),
 
-            _sectionLabel(context, 'Email'),
+            _sectionLabel(context, l10n.email),
             TextFormField(
               controller: _emailController,
               textInputAction: TextInputAction.next,
@@ -105,27 +107,27 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 prefixIcon: Icon(Icons.email_outlined),
               ),
               validator: (String? v) {
-                if (v == null || v.trim().isEmpty) return 'Email is required';
+                if (v == null || v.trim().isEmpty) return l10n.emailRequired;
                 if (!v.contains('@') || !v.contains('.')) {
-                  return 'Please enter a valid email address';
+                  return l10n.validEmail;
                 }
                 return null;
               },
             ),
             const SizedBox(height: 20),
 
-            _sectionLabel(context, 'Where you work'),
+            _sectionLabel(context, l10n.whereYouWorkHint),
             TextFormField(
               controller: _regionController,
               textInputAction: TextInputAction.next,
               textCapitalization: TextCapitalization.words,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'Region / District',
-                prefixIcon: Icon(Icons.map_outlined),
+              decoration: InputDecoration(
+                border: const OutlineInputBorder(),
+                labelText: l10n.regionDistrict,
+                prefixIcon: const Icon(Icons.map_outlined),
               ),
               validator: (String? v) => (v == null || v.trim().isEmpty)
-                  ? 'Please enter your region'
+                  ? l10n.enterRegion
                   : null,
             ),
             const SizedBox(height: 16),
@@ -133,25 +135,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
               controller: _facilityController,
               textInputAction: TextInputAction.next,
               textCapitalization: TextCapitalization.words,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'Health facility',
-                prefixIcon: Icon(Icons.local_hospital_outlined),
+              decoration: InputDecoration(
+                border: const OutlineInputBorder(),
+                labelText: l10n.healthFacility,
+                prefixIcon: const Icon(Icons.local_hospital_outlined),
               ),
               validator: (String? v) => (v == null || v.trim().isEmpty)
-                  ? 'Please enter your facility'
+                  ? l10n.enterFacility
                   : null,
             ),
             const SizedBox(height: 20),
 
-            _sectionLabel(context, 'Password'),
+            _sectionLabel(context, l10n.password),
             TextFormField(
               controller: _passwordController,
               obscureText: _obscurePassword,
               decoration: InputDecoration(
                 border: const OutlineInputBorder(),
-                hintText: 'At least ${AppConstants.minPasswordLength} '
-                    'characters',
+                hintText: l10n.minPasswordHint(AppConstants.minPasswordLength),
                 prefixIcon: const Icon(Icons.lock_outline),
                 suffixIcon: IconButton(
                   icon: Icon(_obscurePassword
@@ -162,10 +163,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
               ),
               validator: (String? v) {
-                if (v == null || v.isEmpty) return 'Password is required';
+                if (v == null || v.isEmpty) return l10n.passwordRequired;
                 if (v.length < AppConstants.minPasswordLength) {
-                  return 'Use at least ${AppConstants.minPasswordLength} '
-                      'characters';
+                  return l10n.minPasswordHint(AppConstants.minPasswordLength);
                 }
                 return null;
               },
@@ -174,19 +174,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
             TextFormField(
               controller: _confirmController,
               obscureText: _obscurePassword,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'Confirm password',
-                prefixIcon: Icon(Icons.lock_outline),
+              decoration: InputDecoration(
+                border: const OutlineInputBorder(),
+                labelText: l10n.confirmPassword,
+                prefixIcon: const Icon(Icons.lock_outline),
               ),
               validator: (String? v) => (v != _passwordController.text)
-                  ? 'Passwords do not match'
+                  ? l10n.passwordsNoMatch
                   : null,
             ),
             const SizedBox(height: 12),
             Text(
-              'Creating your account needs internet this one time. '
-              'After that, you can use the app offline.',
+              l10n.registerInternetInfo,
               style: Theme.of(context)
                   .textTheme
                   .bodySmall
@@ -205,14 +204,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                     )
                   : const Icon(Icons.person_add),
-              label: Text(_submitting ? 'Creating...' : 'Create Account'),
+              label: Text(_submitting ? l10n.creating : l10n.createAccount),
               onPressed: _submitting ? null : _onRegister,
             ),
             const SizedBox(height: 8),
             Center(
               child: TextButton(
                 onPressed: () => context.go('/login'),
-                child: const Text('I already have an account'),
+                child: Text(l10n.alreadyHaveAccount),
               ),
             ),
           ],

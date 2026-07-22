@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/colors.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/common/app_bottom_nav.dart';
 
@@ -82,7 +83,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
     if (!mounted) return;
     setState(() => _savingProfile = false);
-    _snack(error ?? 'Your details have been saved.');
+    _snack(error ?? AppLocalizations.of(context).detailsSaved);
   }
 
   Future<void> _saveEmail() async {
@@ -92,9 +93,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         await AuthProvider.instance.service.updateEmail(_emailController.text);
     if (!mounted) return;
     setState(() => _savingEmail = false);
-    _snack(error ??
-        'We sent a confirmation link to your new email. '
-            'Your email changes once you open it.');
+    _snack(error ?? AppLocalizations.of(context).emailConfirmSent);
   }
 
   Future<void> _savePassword() async {
@@ -108,20 +107,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _newPasswordController.clear();
       _confirmPasswordController.clear();
     }
-    _snack(error ?? 'Your password has been changed.');
+    _snack(error ?? AppLocalizations.of(context).passwordChanged);
   }
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('My Profile')),
+      appBar: AppBar(title: Text(l10n.profileTitle)),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : ListView(
               padding: const EdgeInsets.all(16),
               children: <Widget>[
                 Text(
-                  'Account changes need internet. Triage works offline.',
+                  l10n.profileOnlineNote,
                   style: Theme.of(context)
                       .textTheme
                       .bodySmall
@@ -144,15 +144,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
   /// Settings and Log out, moved here from the old home-screen account menu
   /// when the header icons were replaced by the bottom tab bar.
   Widget _buildAccountCard(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     return _Card(
-      title: 'Account',
+      title: l10n.account,
       child: Column(
         children: <Widget>[
           ListTile(
             contentPadding: EdgeInsets.zero,
+            leading: const Icon(Icons.volunteer_activism_outlined,
+                color: AppColors.textSecondary),
+            title: Text(l10n.viewMyContributions),
+            trailing: const Icon(Icons.chevron_right_rounded,
+                color: AppColors.textSecondary),
+            onTap: () => context.push('/contributions'),
+          ),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
             leading: const Icon(Icons.settings_rounded,
                 color: AppColors.textSecondary),
-            title: const Text('Settings'),
+            title: Text(l10n.settings),
             trailing: const Icon(Icons.chevron_right_rounded,
                 color: AppColors.textSecondary),
             onTap: () => context.push('/settings'),
@@ -160,8 +170,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ListTile(
             contentPadding: EdgeInsets.zero,
             leading: const Icon(Icons.logout_rounded, color: AppColors.urgent),
-            title: const Text('Log out',
-                style: TextStyle(color: AppColors.urgent)),
+            title: Text(l10n.logout,
+                style: const TextStyle(color: AppColors.urgent)),
             onTap: () => _confirmLogout(context),
           ),
         ],
@@ -170,19 +180,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _confirmLogout(BuildContext context) async {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     final bool? confirmed = await showDialog<bool>(
       context: context,
       builder: (BuildContext ctx) => AlertDialog(
-        title: const Text('Log out?'),
-        content: const Text('You will need to sign in again to continue.'),
+        title: Text(l10n.logoutTitle),
+        content: Text(l10n.logoutBody),
         actions: <Widget>[
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Log out'),
+            child: Text(l10n.logout),
           ),
         ],
       ),
@@ -194,8 +205,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildProfileCard(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     return _Card(
-      title: 'Your details',
+      title: l10n.yourDetails,
       child: Form(
         key: _profileFormKey,
         child: Column(
@@ -204,33 +216,33 @@ class _ProfileScreenState extends State<ProfileScreen> {
             TextFormField(
               controller: _nameController,
               textCapitalization: TextCapitalization.words,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'Display name',
-                prefixIcon: Icon(Icons.badge_outlined),
+              decoration: InputDecoration(
+                border: const OutlineInputBorder(),
+                labelText: l10n.displayName,
+                prefixIcon: const Icon(Icons.badge_outlined),
               ),
               validator: (String? v) => (v == null || v.trim().isEmpty)
-                  ? 'Please enter your name'
+                  ? l10n.enterName
                   : null,
             ),
             const SizedBox(height: 16),
             TextFormField(
               controller: _regionController,
               textCapitalization: TextCapitalization.words,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'Region / District',
-                prefixIcon: Icon(Icons.map_outlined),
+              decoration: InputDecoration(
+                border: const OutlineInputBorder(),
+                labelText: l10n.regionDistrict,
+                prefixIcon: const Icon(Icons.map_outlined),
               ),
             ),
             const SizedBox(height: 16),
             TextFormField(
               controller: _facilityController,
               textCapitalization: TextCapitalization.words,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'Health facility',
-                prefixIcon: Icon(Icons.local_hospital_outlined),
+              decoration: InputDecoration(
+                border: const OutlineInputBorder(),
+                labelText: l10n.healthFacility,
+                prefixIcon: const Icon(Icons.local_hospital_outlined),
               ),
             ),
             const SizedBox(height: 16),
@@ -238,7 +250,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               icon: _savingProfile
                   ? _spinner()
                   : const Icon(Icons.save_outlined),
-              label: Text(_savingProfile ? 'Saving...' : 'Save Details'),
+              label: Text(_savingProfile ? l10n.saving : l10n.saveDetails),
               onPressed: _savingProfile ? null : _saveProfile,
             ),
           ],
@@ -248,8 +260,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildEmailCard(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     return _Card(
-      title: 'Email',
+      title: l10n.email,
       child: Form(
         key: _emailFormKey,
         child: Column(
@@ -259,15 +272,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
               controller: _emailController,
               keyboardType: TextInputType.emailAddress,
               autocorrect: false,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'Email',
-                prefixIcon: Icon(Icons.email_outlined),
+              decoration: InputDecoration(
+                border: const OutlineInputBorder(),
+                labelText: l10n.email,
+                prefixIcon: const Icon(Icons.email_outlined),
               ),
               validator: (String? v) {
-                if (v == null || v.trim().isEmpty) return 'Email is required';
+                if (v == null || v.trim().isEmpty) return l10n.emailRequired;
                 if (!v.contains('@') || !v.contains('.')) {
-                  return 'Please enter a valid email address';
+                  return l10n.validEmail;
                 }
                 return null;
               },
@@ -276,7 +289,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ElevatedButton.icon(
               icon:
                   _savingEmail ? _spinner() : const Icon(Icons.email_outlined),
-              label: Text(_savingEmail ? 'Sending...' : 'Update Email'),
+              label: Text(_savingEmail ? l10n.sending : l10n.updateEmail),
               onPressed: _savingEmail ? null : _saveEmail,
             ),
           ],
@@ -286,8 +299,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildPasswordCard(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     return _Card(
-      title: 'Change password',
+      title: l10n.changePasswordTitle,
       child: Form(
         key: _passwordFormKey,
         child: Column(
@@ -298,7 +312,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               obscureText: _obscurePassword,
               decoration: InputDecoration(
                 border: const OutlineInputBorder(),
-                labelText: 'New password',
+                labelText: l10n.newPassword,
                 prefixIcon: const Icon(Icons.lock_outline),
                 suffixIcon: IconButton(
                   icon: Icon(_obscurePassword
@@ -309,10 +323,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ),
               validator: (String? v) {
-                if (v == null || v.isEmpty) return 'Password is required';
+                if (v == null || v.isEmpty) return l10n.passwordRequired;
                 if (v.length < AppConstants.minPasswordLength) {
-                  return 'Use at least ${AppConstants.minPasswordLength} '
-                      'characters';
+                  return l10n.minPasswordHint(AppConstants.minPasswordLength);
                 }
                 return null;
               },
@@ -321,13 +334,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
             TextFormField(
               controller: _confirmPasswordController,
               obscureText: _obscurePassword,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'Confirm new password',
-                prefixIcon: Icon(Icons.lock_outline),
+              decoration: InputDecoration(
+                border: const OutlineInputBorder(),
+                labelText: l10n.confirmNewPassword,
+                prefixIcon: const Icon(Icons.lock_outline),
               ),
               validator: (String? v) => (v != _newPasswordController.text)
-                  ? 'Passwords do not match'
+                  ? l10n.passwordsNoMatch
                   : null,
             ),
             const SizedBox(height: 16),
@@ -336,7 +349,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ? _spinner()
                   : const Icon(Icons.lock_reset),
               label:
-                  Text(_savingPassword ? 'Saving...' : 'Change Password'),
+                  Text(_savingPassword ? l10n.saving : l10n.changePasswordBtn),
               onPressed: _savingPassword ? null : _savePassword,
             ),
           ],

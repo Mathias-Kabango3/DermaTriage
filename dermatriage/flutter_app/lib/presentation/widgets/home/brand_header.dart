@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_shadows.dart';
 import '../../../core/theme/colors.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../providers/auth_provider.dart';
 import '../common/app_logo.dart';
 
@@ -18,19 +19,20 @@ class BrandHeader extends StatelessWidget {
   const BrandHeader({super.key, this.username});
 
   Future<void> _confirmLogout(BuildContext context) async {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     final bool? confirmed = await showDialog<bool>(
       context: context,
       builder: (BuildContext ctx) => AlertDialog(
-        title: const Text('Log out?'),
-        content: const Text('You will need to sign in again to continue.'),
+        title: Text(l10n.logoutTitle),
+        content: Text(l10n.logoutBody),
         actions: <Widget>[
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Log out'),
+            child: Text(l10n.logout),
           ),
         ],
       ),
@@ -78,7 +80,8 @@ class BrandHeader extends StatelessWidget {
                   ),
                   const SizedBox(height: AppSpacing.sm),
                   Text(
-                    'Offline AI-assisted skin triage',
+                    AppLocalizations.of(context).homeTagline,
+                    textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Colors.white.withValues(alpha: 0.85),
                       fontSize: 14,
@@ -112,8 +115,9 @@ class _AccountMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     return PopupMenuButton<String>(
-      tooltip: 'Account',
+      tooltip: l10n.account,
       icon: const Icon(Icons.account_circle, color: Colors.white, size: 30),
       offset: const Offset(0, 44),
       onSelected: (String value) {
@@ -129,7 +133,7 @@ class _AccountMenu extends StatelessWidget {
               const SizedBox(width: 10),
               Flexible(
                 child: Text(
-                  username ?? 'Signed in',
+                  username != null ? l10n.signedInAs(username!) : l10n.account,
                   style: const TextStyle(
                     color: AppColors.textPrimary,
                     fontWeight: FontWeight.w600,
@@ -141,13 +145,14 @@ class _AccountMenu extends StatelessWidget {
           ),
         ),
         const PopupMenuDivider(),
-        const PopupMenuItem<String>(
+        PopupMenuItem<String>(
           value: 'logout',
           child: Row(
             children: <Widget>[
-              Icon(Icons.logout, size: 20, color: AppColors.urgent),
-              SizedBox(width: 10),
-              Text('Log out', style: TextStyle(color: AppColors.urgent)),
+              const Icon(Icons.logout, size: 20, color: AppColors.urgent),
+              const SizedBox(width: 10),
+              Text(l10n.logout,
+                  style: const TextStyle(color: AppColors.urgent)),
             ],
           ),
         ),

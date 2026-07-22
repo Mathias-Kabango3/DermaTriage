@@ -1,16 +1,22 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/cupertino.dart' show CupertinoLocalizations;
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 
 import 'core/constants/app_constants.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'firebase_options.dart';
+import 'l10n/app_localizations.dart';
 import 'presentation/providers/auth_provider.dart';
+import 'presentation/providers/contribution_provider.dart';
 import 'presentation/providers/history_provider.dart';
+import 'presentation/providers/locale_provider.dart';
 import 'presentation/providers/patient_provider.dart';
 import 'presentation/providers/triage_provider.dart';
 import 'presentation/widgets/common/consent_dialog.dart';
+import 'services/contribution/contribution_upload_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,12 +27,20 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   AuthProvider.instance.init();
-  runApp(const DermaTriage());
+  // Retry any healthy-skin contributions still queued from a previous
+  // offline session, then keep retrying whenever connectivity returns.
+  ContributionUploadService.instance.startAutoSync();
+  // Restore the saved language before the first frame so the app opens in it.
+  final LocaleProvider localeProvider = LocaleProvider();
+  await localeProvider.load();
+  runApp(DermaTriage(localeProvider: localeProvider));
 }
 
 /// Root application widget.
 class DermaTriage extends StatelessWidget {
-  const DermaTriage({super.key});
+  final LocaleProvider localeProvider;
+
+  const DermaTriage({super.key, required this.localeProvider});
 
   @override
   Widget build(BuildContext context) {
@@ -36,6 +50,7 @@ class DermaTriage extends StatelessWidget {
         ChangeNotifierProvider<AuthProvider>.value(
           value: AuthProvider.instance,
         ),
+        ChangeNotifierProvider<LocaleProvider>.value(value: localeProvider),
         ChangeNotifierProvider<TriageProvider>(
           create: (_) => TriageProvider()..init(),
         ),
@@ -45,14 +60,34 @@ class DermaTriage extends StatelessWidget {
         ChangeNotifierProvider<HistoryProvider>(
           create: (_) => HistoryProvider(),
         ),
+        ChangeNotifierProvider<ContributionProvider>(
+          create: (_) => ContributionProvider(),
+        ),
       ],
-      child: MaterialApp.router(
-        title: AppConstants.appName,
-        theme: AppTheme.light,
-        routerConfig: appRouter,
-        debugShowCheckedModeBanner: false,
-        builder: (BuildContext context, Widget? child) {
-          return _ConsentGate(child: child ?? const SizedBox.shrink());
+      child: Consumer<LocaleProvider>(
+        builder: (BuildContext context, LocaleProvider locale, _) {
+          return MaterialApp.router(
+            title: AppConstants.appName,
+            theme: AppTheme.light,
+            routerConfig: appRouter,
+            debugShowCheckedModeBanner: false,
+            // Language: English + Kinyarwanda. Framework strings fall back to
+            // English for Kinyarwanda (Flutter ships no `rw` framework data).
+            locale: locale.locale,
+            supportedLocales: AppLocalizations.supportedLocales,
+            localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
+              AppLocalizations.delegate,
+              EnglishFallbackDelegate<MaterialLocalizations>(
+                  GlobalMaterialLocalizations.delegate),
+              EnglishFallbackDelegate<WidgetsLocalizations>(
+                  GlobalWidgetsLocalizations.delegate),
+              EnglishFallbackDelegate<CupertinoLocalizations>(
+                  GlobalCupertinoLocalizations.delegate),
+            ],
+            builder: (BuildContext context, Widget? child) {
+              return _ConsentGate(child: child ?? const SizedBox.shrink());
+            },
+          );
         },
       ),
     );

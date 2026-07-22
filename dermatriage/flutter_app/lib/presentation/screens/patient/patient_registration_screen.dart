@@ -5,6 +5,7 @@ import 'package:uuid/uuid.dart';
 
 import '../../../core/theme/colors.dart';
 import '../../../data/models/patient.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../providers/patient_provider.dart';
 
 /// Collects patient demographics and consent before image capture.
@@ -19,6 +20,7 @@ class PatientRegistrationScreen extends StatefulWidget {
 class _PatientRegistrationScreenState
     extends State<PatientRegistrationScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
   final _locationController = TextEditingController();
 
   // Age range label -> representative age stored as approximateAge.
@@ -32,16 +34,6 @@ class _PatientRegistrationScreenState
     '70+': 75,
   };
 
-  // Fitzpatrick type descriptions (index 0 -> type 1).
-  static const List<String> _fitzpatrickDescriptions = <String>[
-    'Type I — Very fair skin; always burns, never tans.',
-    'Type II — Fair skin; usually burns, tans minimally.',
-    'Type III — Medium skin; sometimes burns, tans uniformly.',
-    'Type IV — Olive skin; rarely burns, tans easily.',
-    'Type V — Brown skin; very rarely burns, tans darkly.',
-    'Type VI — Deeply pigmented skin; never burns.',
-  ];
-
   String? _sex;
   String? _ageRange;
   int? _fitzpatrickType; // 1–6
@@ -50,6 +42,7 @@ class _PatientRegistrationScreenState
 
   @override
   void dispose() {
+    _nameController.dispose();
     _locationController.dispose();
     super.dispose();
   }
@@ -61,8 +54,8 @@ class _PatientRegistrationScreenState
 
     if (_sex == null || _ageRange == null || _fitzpatrickType == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please complete sex, age range and skin type.'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).completeFields),
         ),
       );
       return;
@@ -70,6 +63,7 @@ class _PatientRegistrationScreenState
 
     final patient = Patient(
       id: const Uuid().v4(),
+      name: _nameController.text.trim(),
       approximateAge: _ageRanges[_ageRange],
       sex: _sex!,
       location: _locationController.text.trim(),
@@ -85,19 +79,34 @@ class _PatientRegistrationScreenState
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('New Patient')),
+      appBar: AppBar(title: Text(l10n.patientTitle)),
       body: Form(
         key: _formKey,
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: <Widget>[
-            _sectionLabel(context, 'Sex'),
+            _sectionLabel(context, l10n.patientName),
+            TextFormField(
+              controller: _nameController,
+              decoration: InputDecoration(
+                border: const OutlineInputBorder(),
+                hintText: l10n.patientNameHint,
+              ),
+              validator: (String? value) =>
+                  (value == null || value.trim().isEmpty)
+                      ? l10n.patientNameRequired
+                      : null,
+            ),
+            const SizedBox(height: 20),
+
+            _sectionLabel(context, l10n.sex),
             Wrap(
               spacing: 8,
               children: <String>['M', 'F', 'Other'].map((String option) {
                 return ChoiceChip(
-                  label: Text(option),
+                  label: Text(l10n.sexLabel(option)),
                   selected: _sex == option,
                   onSelected: (_) => setState(() => _sex = option),
                 );
@@ -105,12 +114,12 @@ class _PatientRegistrationScreenState
             ),
             const SizedBox(height: 20),
 
-            _sectionLabel(context, 'Age range'),
+            _sectionLabel(context, l10n.ageRange),
             DropdownButtonFormField<String>(
               initialValue: _ageRange,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                hintText: 'Select age range',
+              decoration: InputDecoration(
+                border: const OutlineInputBorder(),
+                hintText: l10n.selectAgeRange,
               ),
               items: _ageRanges.keys
                   .map((String r) =>
@@ -120,27 +129,27 @@ class _PatientRegistrationScreenState
             ),
             const SizedBox(height: 20),
 
-            _sectionLabel(context, 'Location'),
+            _sectionLabel(context, l10n.location),
             TextFormField(
               controller: _locationController,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                hintText: 'Village / clinic / district',
+              decoration: InputDecoration(
+                border: const OutlineInputBorder(),
+                hintText: l10n.locationHint,
               ),
               validator: (String? value) =>
                   (value == null || value.trim().isEmpty)
-                      ? 'Location is required'
+                      ? l10n.locationRequired
                       : null,
             ),
             const SizedBox(height: 20),
 
-            _sectionLabel(context, 'Fitzpatrick skin type'),
+            _sectionLabel(context, l10n.skinType),
             _buildFitzpatrickSelector(),
             const SizedBox(height: 8),
             Text(
               _fitzpatrickType == null
-                  ? 'Tap a circle to select the closest skin tone.'
-                  : _fitzpatrickDescriptions[_fitzpatrickType! - 1],
+                  ? l10n.skinTypeHint
+                  : l10n.fitzpatrickDescription(_fitzpatrickType!),
               style: Theme.of(context)
                   .textTheme
                   .bodySmall
@@ -154,10 +163,7 @@ class _PatientRegistrationScreenState
               value: _consentGiven,
               onChanged: (bool? v) =>
                   setState(() => _consentGiven = v ?? false),
-              title: const Text(
-                'I confirm the patient has given verbal and written consent '
-                'for this assessment and photo.',
-              ),
+              title: Text(l10n.consentAssessment),
             ),
             CheckboxListTile(
               contentPadding: EdgeInsets.zero,
@@ -165,16 +171,13 @@ class _PatientRegistrationScreenState
               value: _photoConsent,
               onChanged: (bool? v) =>
                   setState(() => _photoConsent = v ?? false),
-              title: const Text(
-                'The patient consents to a photo being taken and stored on '
-                'this device for the assessment.',
-              ),
+              title: Text(l10n.consentPhoto),
             ),
             const SizedBox(height: 24),
 
             ElevatedButton.icon(
               icon: const Icon(Icons.camera_alt),
-              label: const Text('Continue to Capture'),
+              label: Text(l10n.continueToCapture),
               onPressed: _canContinue ? _onContinue : null,
             ),
             const SizedBox(height: 16),

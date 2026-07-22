@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_shadows.dart';
 import '../../../core/theme/colors.dart';
+import '../../../l10n/app_localizations.dart';
 
 /// The four persistent destinations.
 enum AppTab { home, newTriage, history, profile }
@@ -35,6 +36,7 @@ class AppBottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     return Container(
       decoration: const BoxDecoration(
         color: AppColors.surface,
@@ -49,26 +51,26 @@ class AppBottomNav extends StatelessWidget {
           elevation: 0,
           height: 68,
           labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-          destinations: const <NavigationDestination>[
+          destinations: <NavigationDestination>[
             NavigationDestination(
-              icon: Icon(Icons.home_outlined),
-              selectedIcon: Icon(Icons.home_rounded),
-              label: 'Home',
+              icon: const Icon(Icons.home_outlined),
+              selectedIcon: const Icon(Icons.home_rounded),
+              label: l10n.navHome,
             ),
             NavigationDestination(
-              icon: Icon(Icons.camera_alt_outlined),
-              selectedIcon: Icon(Icons.camera_alt_rounded),
-              label: 'New Triage',
+              icon: const Icon(Icons.camera_alt_outlined),
+              selectedIcon: const Icon(Icons.camera_alt_rounded),
+              label: l10n.navNewTriage,
             ),
             NavigationDestination(
-              icon: Icon(Icons.history_rounded),
-              selectedIcon: Icon(Icons.history_rounded),
-              label: 'History',
+              icon: const Icon(Icons.history_rounded),
+              selectedIcon: const Icon(Icons.history_rounded),
+              label: l10n.navHistory,
             ),
             NavigationDestination(
-              icon: Icon(Icons.person_outline_rounded),
-              selectedIcon: Icon(Icons.person_rounded),
-              label: 'Profile',
+              icon: const Icon(Icons.person_outline_rounded),
+              selectedIcon: const Icon(Icons.person_rounded),
+              label: l10n.navProfile,
             ),
           ],
         ),

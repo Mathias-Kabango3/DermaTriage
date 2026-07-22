@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/colors.dart';
+import '../../../l10n/app_localizations.dart';
 
 /// Shows how long on-device inference took, with a pass / over-budget state
 /// relative to [AppConstants.inferenceBudgetMs]. Lets the CHW (and reviewers)
@@ -13,6 +14,7 @@ class InferenceTimeChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     final bool withinBudget = inferenceMs <= AppConstants.inferenceBudgetMs;
     final Color color =
         withinBudget ? AppColors.treatLocally : AppColors.monitor;
@@ -36,7 +38,7 @@ class InferenceTimeChip extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           Text(
-            'Inference: ${seconds.toStringAsFixed(2)} s',
+            l10n.inferenceLabel(seconds.toStringAsFixed(2)),
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
@@ -46,8 +48,8 @@ class InferenceTimeChip extends StatelessWidget {
           const SizedBox(width: 8),
           Text(
             withinBudget
-                ? '· within ${budgetSeconds.toStringAsFixed(0)} s target'
-                : '· over ${budgetSeconds.toStringAsFixed(0)} s target',
+                ? l10n.withinTarget(budgetSeconds.toStringAsFixed(0))
+                : l10n.overTarget(budgetSeconds.toStringAsFixed(0)),
             style: const TextStyle(
               fontSize: 12,
               color: AppColors.textSecondary,

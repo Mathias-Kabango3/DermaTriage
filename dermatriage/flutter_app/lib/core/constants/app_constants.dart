@@ -26,7 +26,12 @@ class AppConstants {
   // Local database
   static const String databaseName = 'dermatriage.db';
   // v2 adds the offline `users` table for CHW authentication.
-  static const int databaseVersion = 2;
+  // v3 adds `healthy_skin_contributions` — the local upload queue for the
+  // data-flywheel contribution flow.
+  // v4 adds `patients.name` — a CHW-entered patient name so encounters in
+  // History are recognisable (previously only date + classification were
+  // shown, with no way to tell which patient a record belonged to).
+  static const int databaseVersion = 4;
 
   // Offline authentication
   /// Minimum length for CHW account passwords.

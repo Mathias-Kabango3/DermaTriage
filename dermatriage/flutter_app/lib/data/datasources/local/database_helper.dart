@@ -19,6 +19,7 @@ class DatabaseHelper {
   static const String tableEncounter = 'encounters';
   static const String tableModelEvaluation = 'model_evaluations';
   static const String tableUser = 'users';
+  static const String tableHealthySkinContribution = 'healthy_skin_contributions';
 
   Database? _db;
 
@@ -49,12 +50,22 @@ class DatabaseHelper {
     if (oldVersion < 2) {
       await _createUserTable(db);
     }
+    // v3: healthy-skin contribution upload queue.
+    if (oldVersion < 3) {
+      await _createHealthySkinContributionTable(db);
+    }
+    // v4: patient name, so History can identify who an encounter belongs to.
+    if (oldVersion < 4) {
+      await db.execute(
+          "ALTER TABLE $tablePatient ADD COLUMN name TEXT NOT NULL DEFAULT ''");
+    }
   }
 
   Future<void> _onCreate(Database db, int version) async {
     await db.execute('''
       CREATE TABLE $tablePatient (
         patient_id TEXT PRIMARY KEY,
+        name TEXT NOT NULL DEFAULT '',
         approximate_age INTEGER,
         sex TEXT,
         location TEXT,
@@ -107,6 +118,7 @@ class DatabaseHelper {
     ''');
 
     await _createUserTable(db);
+    await _createHealthySkinContributionTable(db);
 
     await _seedDiseaseClasses(db);
   }
@@ -124,6 +136,31 @@ class DatabaseHelper {
         security_question TEXT NOT NULL,
         security_answer_hash TEXT NOT NULL,
         created_at TEXT NOT NULL
+      )
+    ''');
+  }
+
+  /// Creates the local upload queue for healthy-skin contribution photos.
+  ///
+  /// This row *becomes* the `healthy_skin_contributions` Firestore document
+  /// once uploaded (same id) — see
+  /// lib/data/models/healthy_skin_contribution.dart and
+  /// docs/review_dashboard_schema.md. `sync_status` tracks only whether this
+  /// device has gotten it to the server; it is unrelated to the dashboard's
+  /// own `status` (pending/approved/rejected), which lives entirely in
+  /// Firestore.
+  Future<void> _createHealthySkinContributionTable(Database db) async {
+    await db.execute('''
+      CREATE TABLE $tableHealthySkinContribution (
+        id TEXT PRIMARY KEY,
+        local_photo_path TEXT NOT NULL,
+        fitzpatrick_type INTEGER NOT NULL,
+        body_region TEXT NOT NULL,
+        contributor_id TEXT NOT NULL,
+        facility TEXT NOT NULL,
+        captured_at TEXT NOT NULL,
+        sync_status TEXT NOT NULL DEFAULT 'queued',
+        last_error TEXT
       )
     ''');
   }

@@ -11,6 +11,7 @@ import '../../../core/constants/triage_levels.dart';
 import '../../../core/theme/colors.dart';
 import '../../../data/models/encounter.dart';
 import '../../../data/models/triage_result.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../providers/history_provider.dart';
 import '../../providers/patient_provider.dart';
 import '../../providers/triage_provider.dart';
@@ -56,7 +57,7 @@ class _ResultScreenState extends State<ResultScreen> {
 
     if (patient == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No patient in session. Cannot save.')),
+        SnackBar(content: Text(AppLocalizations.of(context).noPatientSession)),
       );
       return;
     }
@@ -83,7 +84,7 @@ class _ResultScreenState extends State<ResultScreen> {
 
     context.read<TriageProvider>().reset();
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Encounter saved.')),
+      SnackBar(content: Text(AppLocalizations.of(context).encounterSaved)),
     );
     context.go('/');
   }
@@ -91,7 +92,7 @@ class _ResultScreenState extends State<ResultScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Triage Result')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context).triageResultTitle)),
       body: Consumer<TriageProvider>(
         builder: (BuildContext context, TriageProvider provider, _) {
           switch (provider.state) {
@@ -113,19 +114,21 @@ class _ResultScreenState extends State<ResultScreen> {
   }
 
   Widget _buildLoading() {
-    return const Center(
+    return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          CircularProgressIndicator(),
-          SizedBox(height: 16),
-          Text('Analysing lesion...', style: TextStyle(fontSize: 16)),
+          const CircularProgressIndicator(),
+          const SizedBox(height: 16),
+          Text(AppLocalizations.of(context).analysing,
+              style: const TextStyle(fontSize: 16)),
         ],
       ),
     );
   }
 
   Widget _buildError(TriageProvider provider) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -134,14 +137,14 @@ class _ResultScreenState extends State<ResultScreen> {
           const Icon(Icons.error_outline, size: 56, color: AppColors.urgent),
           const SizedBox(height: 16),
           Text(
-            provider.error ?? 'Something went wrong.',
+            provider.error ?? l10n.somethingWrong,
             textAlign: TextAlign.center,
             style: const TextStyle(fontSize: 16),
           ),
           const SizedBox(height: 24),
           ElevatedButton.icon(
             icon: const Icon(Icons.refresh),
-            label: const Text('Retry'),
+            label: Text(l10n.retry),
             onPressed: () => provider.runTriage(),
           ),
         ],
@@ -157,8 +160,9 @@ class _ResultScreenState extends State<ResultScreen> {
     TriageProvider provider,
     TriageResult result,
   ) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     final File? image = provider.capturedImage;
-    final _RejectionContent content = _rejectionContent(result.outcome);
+    final _RejectionContent content = _rejectionContent(result.outcome, l10n);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
@@ -203,7 +207,7 @@ class _ResultScreenState extends State<ResultScreen> {
           const SizedBox(height: 28),
           ElevatedButton.icon(
             icon: const Icon(Icons.camera_alt),
-            label: const Text('Retake Photo'),
+            label: Text(l10n.retakePhoto),
             onPressed: () {
               provider.reset();
               context.pop(); // back to the camera screen
@@ -212,7 +216,7 @@ class _ResultScreenState extends State<ResultScreen> {
           const SizedBox(height: 8),
           TextButton.icon(
             icon: const Icon(Icons.home_outlined),
-            label: const Text('Back to Home'),
+            label: Text(l10n.backToHome),
             onPressed: () {
               provider.reset();
               context.go('/');
@@ -224,45 +228,38 @@ class _ResultScreenState extends State<ResultScreen> {
   }
 
   /// Maps a rejection outcome to its icon, colour and CHW-friendly copy.
-  _RejectionContent _rejectionContent(TriageOutcome outcome) {
+  _RejectionContent _rejectionContent(
+      TriageOutcome outcome, AppLocalizations l10n) {
     switch (outcome) {
       case TriageOutcome.notSkin:
-        return const _RejectionContent(
+        return _RejectionContent(
           icon: Icons.image_not_supported_outlined,
           color: AppColors.monitor,
-          title: 'This does not look like skin',
-          message:
-              'The image does not appear to show skin. Please take a clear, '
-              'close-up photo of the affected skin area and try again.',
+          title: l10n.notSkinTitle,
+          message: l10n.notSkinMsg,
         );
       case TriageOutcome.healthy:
-        return const _RejectionContent(
+        return _RejectionContent(
           icon: Icons.verified_outlined,
           color: AppColors.treatLocally,
-          title: 'This skin appears healthy',
-          message:
-              'No skin condition was detected. If the patient still has a '
-              'concern, retake the photo of the affected area or refer them '
-              'to a clinician.',
+          title: l10n.healthyTitle,
+          message: l10n.healthyMsg,
         );
       case TriageOutcome.lowConfidence:
         return _RejectionContent(
           icon: Icons.help_outline,
           color: AppColors.urgent,
-          title: 'Not confident enough',
-          message:
-              'The app is not sure about this image (below '
-              '${(AppConstants.confidenceThreshold * 100).round()}% '
-              'confidence). Please retake a clear, well-lit, close-up photo. '
-              'If you are still concerned, refer the patient.',
+          title: l10n.lowConfTitle,
+          message: l10n
+              .lowConfMsg((AppConstants.confidenceThreshold * 100).round()),
         );
       case TriageOutcome.diagnosis:
         // Not a rejection — defensive default.
-        return const _RejectionContent(
+        return _RejectionContent(
           icon: Icons.help_outline,
           color: AppColors.monitor,
-          title: 'Please retake the photo',
-          message: 'Please take a clear, close-up photo and try again.',
+          title: l10n.retakeTitle,
+          message: l10n.retakeMsg,
         );
     }
   }
@@ -273,6 +270,7 @@ class _ResultScreenState extends State<ResultScreen> {
     TriageResult result,
   ) {
     // Reached only for diagnosis outcomes, where triageLevel is non-null.
+    final AppLocalizations l10n = AppLocalizations.of(context);
     final TriageLevel level = TriageLevelExtension.fromId(result.triageLevel!);
     final File? image = provider.capturedImage;
     final double photoHeight = MediaQuery.of(context).size.height * 0.5;
@@ -288,7 +286,7 @@ class _ResultScreenState extends State<ResultScreen> {
                 ? Image.file(image, fit: BoxFit.cover)
                 : Container(
                     color: Colors.black12,
-                    child: const Center(child: Text('No image')),
+                    child: Center(child: Text(l10n.noImage)),
                   ),
           ),
           Padding(
@@ -316,9 +314,9 @@ class _ResultScreenState extends State<ResultScreen> {
                 TextField(
                   controller: _notesController,
                   maxLines: 3,
-                  decoration: const InputDecoration(
-                    labelText: 'CHW notes (optional)',
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: l10n.chwNotesOptional,
+                    border: const OutlineInputBorder(),
                     alignLabelWithHint: true,
                   ),
                 ),
@@ -326,7 +324,7 @@ class _ResultScreenState extends State<ResultScreen> {
                 // Save encounter.
                 ElevatedButton.icon(
                   icon: const Icon(Icons.save),
-                  label: Text(_saving ? 'Saving...' : 'Save Encounter'),
+                  label: Text(_saving ? l10n.saving : l10n.saveEncounter),
                   onPressed: _saving ? null : () => _saveEncounter(result),
                 ),
                 const SizedBox(height: 8),

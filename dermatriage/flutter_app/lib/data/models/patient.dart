@@ -4,6 +4,7 @@
 /// string, matching the `patients` table schema.
 class Patient {
   final String id; // UUID
+  final String name;
   final int? approximateAge;
   final String sex;
   final String location;
@@ -14,6 +15,7 @@ class Patient {
 
   const Patient({
     required this.id,
+    required this.name,
     this.approximateAge,
     required this.sex,
     required this.location,
@@ -26,6 +28,7 @@ class Patient {
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'patient_id': id,
+      'name': name,
       'approximate_age': approximateAge,
       'sex': sex,
       'location': location,
@@ -39,6 +42,7 @@ class Patient {
   factory Patient.fromMap(Map<String, dynamic> map) {
     return Patient(
       id: map['patient_id'] as String,
+      name: (map['name'] as String?) ?? '',
       approximateAge: map['approximate_age'] as int?,
       sex: map['sex'] as String,
       location: map['location'] as String,
@@ -51,6 +55,7 @@ class Patient {
 
   Patient copyWith({
     String? id,
+    String? name,
     int? approximateAge,
     String? sex,
     String? location,
@@ -61,6 +66,7 @@ class Patient {
   }) {
     return Patient(
       id: id ?? this.id,
+      name: name ?? this.name,
       approximateAge: approximateAge ?? this.approximateAge,
       sex: sex ?? this.sex,
       location: location ?? this.location,

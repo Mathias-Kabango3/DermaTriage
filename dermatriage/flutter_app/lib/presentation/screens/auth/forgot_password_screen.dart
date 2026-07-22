@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/colors.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../providers/auth_provider.dart';
 
 /// Password recovery: enter your email and Firebase sends a reset link.
@@ -48,7 +49,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Forgot Password')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context).forgotTitle)),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: <Widget>[
@@ -59,15 +60,15 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   }
 
   Widget _buildForm(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     return Form(
       key: _formKey,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          _sectionLabel(context, 'Enter your email'),
+          _sectionLabel(context, l10n.enterYourEmail),
           Text(
-            'We will email you a link to reset your password. '
-            'This needs an internet connection.',
+            l10n.forgotIntro,
             style: Theme.of(context)
                 .textTheme
                 .bodySmall
@@ -78,19 +79,19 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             controller: _emailController,
             keyboardType: TextInputType.emailAddress,
             autocorrect: false,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              labelText: 'Email',
-              prefixIcon: Icon(Icons.email_outlined),
+            decoration: InputDecoration(
+              border: const OutlineInputBorder(),
+              labelText: l10n.email,
+              prefixIcon: const Icon(Icons.email_outlined),
             ),
             validator: (String? v) => (v == null || v.trim().isEmpty)
-                ? 'Please enter your email'
+                ? l10n.enterEmail
                 : null,
           ),
           const SizedBox(height: 24),
           ElevatedButton.icon(
             icon: const Icon(Icons.send),
-            label: Text(_busy ? 'Sending...' : 'Send Reset Link'),
+            label: Text(_busy ? l10n.sending : l10n.sendResetLink),
             onPressed: _busy ? null : _onSendReset,
           ),
         ],
@@ -99,6 +100,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   }
 
   Widget _buildSent(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
@@ -107,7 +109,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             size: 64, color: AppColors.primary),
         const SizedBox(height: 16),
         Text(
-          'Check your email',
+          l10n.checkEmail,
           textAlign: TextAlign.center,
           style: Theme.of(context)
               .textTheme
@@ -116,8 +118,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         ),
         const SizedBox(height: 8),
         Text(
-          'We sent a reset link to ${_emailController.text.trim()}. '
-          'Open it to set a new password, then come back and log in.',
+          l10n.resetSent(_emailController.text.trim()),
           textAlign: TextAlign.center,
           style: Theme.of(context)
               .textTheme
@@ -127,7 +128,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         const SizedBox(height: 24),
         ElevatedButton.icon(
           icon: const Icon(Icons.login),
-          label: const Text('Back to Log In'),
+          label: Text(l10n.backToLogin),
           onPressed: () => context.go('/login'),
         ),
       ],

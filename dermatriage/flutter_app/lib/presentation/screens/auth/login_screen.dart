@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/colors.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../services/auth/auth_service.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/common/app_logo.dart';
@@ -76,6 +77,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     return Scaffold(
       body: SafeArea(
         child: Center(
@@ -98,7 +100,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Sign in to continue',
+                    l10n.loginHeading,
                     style: Theme.of(context)
                         .textTheme
                         .bodyMedium
@@ -110,13 +112,13 @@ class _LoginScreenState extends State<LoginScreen> {
                     textInputAction: TextInputAction.next,
                     keyboardType: TextInputType.emailAddress,
                     autocorrect: false,
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      labelText: 'Email',
-                      prefixIcon: Icon(Icons.email_outlined),
+                    decoration: InputDecoration(
+                      border: const OutlineInputBorder(),
+                      labelText: l10n.email,
+                      prefixIcon: const Icon(Icons.email_outlined),
                     ),
                     validator: (String? v) => (v == null || v.trim().isEmpty)
-                        ? 'Please enter your email'
+                        ? l10n.enterEmail
                         : null,
                   ),
                   const SizedBox(height: 16),
@@ -125,7 +127,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     obscureText: _obscurePassword,
                     decoration: InputDecoration(
                       border: const OutlineInputBorder(),
-                      labelText: 'Password',
+                      labelText: l10n.password,
                       prefixIcon: const Icon(Icons.lock_outline),
                       suffixIcon: IconButton(
                         icon: Icon(_obscurePassword
@@ -136,7 +138,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                     validator: (String? v) => (v == null || v.isEmpty)
-                        ? 'Please enter your password'
+                        ? l10n.enterPassword
                         : null,
                   ),
                   const SizedBox(height: 8),
@@ -144,7 +146,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     alignment: Alignment.centerRight,
                     child: TextButton(
                       onPressed: () => context.push('/forgot-password'),
-                      child: const Text('Forgot password?'),
+                      child: Text(l10n.forgotPassword),
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -159,7 +161,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                           )
                         : const Icon(Icons.login),
-                    label: Text(_submitting ? 'Signing in...' : 'Log In'),
+                    label: Text(_submitting ? l10n.signingIn : l10n.logIn),
                     onPressed: _submitting ? null : _onLogin,
                   ),
                   const SizedBox(height: 16),
@@ -184,8 +186,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           )
                         : const Icon(Icons.g_mobiledata, size: 28),
                     label: Text(_googleSubmitting
-                        ? 'Please wait...'
-                        : 'Continue with Google'),
+                        ? l10n.pleaseWait
+                        : l10n.continueWithGoogle),
                     style: OutlinedButton.styleFrom(
                       minimumSize: const Size.fromHeight(48),
                       foregroundColor: AppColors.textPrimary,
@@ -195,8 +197,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    'The first sign-in needs internet. '
-                    'After that, the app works offline.',
+                    l10n.firstSignInInfo,
                     textAlign: TextAlign.center,
                     style: Theme.of(context)
                         .textTheme
@@ -208,7 +209,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       Text(
-                        'New health worker?',
+                        l10n.newHealthWorker,
                         style: Theme.of(context)
                             .textTheme
                             .bodyMedium
@@ -216,7 +217,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       TextButton(
                         onPressed: () => context.push('/register'),
-                        child: const Text('Register'),
+                        child: Text(l10n.register),
                       ),
                     ],
                   ),

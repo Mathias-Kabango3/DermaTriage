@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/colors.dart';
 import '../../../data/datasources/local/database_helper.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../providers/history_provider.dart';
+import '../../providers/locale_provider.dart';
 import '../../providers/patient_provider.dart';
 
 /// App information, full disclaimer and data-reset controls.
@@ -39,23 +42,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _confirmReset() async {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     final bool? confirmed = await showDialog<bool>(
       context: context,
       builder: (BuildContext ctx) => AlertDialog(
-        title: const Text('Reset all data?'),
-        content: const Text(
-          'This permanently deletes all patients and encounters stored on '
-          'this device. This cannot be undone.',
-        ),
+        title: Text(l10n.resetTitle),
+        content: Text(l10n.resetBody),
         actions: <Widget>[
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             style: TextButton.styleFrom(foregroundColor: AppColors.urgent),
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Delete everything'),
+            child: Text(l10n.deleteEverything),
           ),
         ],
       ),
@@ -78,31 +79,57 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     setState(() => _resetting = false);
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('All data has been reset.')),
+      SnackBar(content: Text(AppLocalizations.of(context).dataReset)),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
+    final LocaleProvider localeProvider = context.watch<LocaleProvider>();
+    final String langCode = localeProvider.locale.languageCode;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
+      appBar: AppBar(title: Text(l10n.settingsTitle)),
       body: ListView(
         children: <Widget>[
-          const _SectionHeader('About'),
-          const ListTile(
-            leading: Icon(Icons.info_outline),
-            title: Text('App version'),
-            trailing: Text(AppConstants.appVersion),
+          // Language switcher — English / Kinyarwanda.
+          _SectionHeader(l10n.sectionLanguage),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            child: SegmentedButton<String>(
+              segments: <ButtonSegment<String>>[
+                ButtonSegment<String>(
+                  value: 'en',
+                  label: Text(l10n.languageEnglish),
+                  icon: const Icon(Icons.language),
+                ),
+                ButtonSegment<String>(
+                  value: 'rw',
+                  label: Text(l10n.languageKinyarwanda),
+                ),
+              ],
+              selected: <String>{langCode},
+              onSelectionChanged: (Set<String> selection) =>
+                  localeProvider.setLocale(Locale(selection.first)),
+            ),
+          ),
+          const Divider(),
+          _SectionHeader(l10n.sectionAbout),
+          ListTile(
+            leading: const Icon(Icons.info_outline),
+            title: Text(l10n.appVersion),
+            trailing: const Text(AppConstants.appVersion),
           ),
           ListTile(
             leading: const Icon(Icons.memory),
-            title: const Text('Model version'),
+            title: Text(l10n.modelVersion),
             // The model id is long, so show it below the title (left-aligned,
             // wraps) rather than squeezed into the trailing slot.
             subtitle: Text(_modelVersion),
           ),
           const Divider(),
-          const _SectionHeader('Disclaimer'),
+          _SectionHeader(l10n.sectionDisclaimer),
           const Padding(
             padding: EdgeInsets.fromLTRB(16, 0, 16, 16),
             child: Text(
@@ -115,7 +142,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
           const Divider(),
-          const _SectionHeader('Data'),
+          _SectionHeader(l10n.legalSection),
+          ListTile(
+            leading: const Icon(Icons.privacy_tip_outlined),
+            title: Text(l10n.privacyPolicyTitle),
+            trailing: const Icon(Icons.chevron_right_rounded,
+                color: AppColors.textSecondary),
+            onTap: () => context.push('/legal/privacy'),
+          ),
+          ListTile(
+            leading: const Icon(Icons.description_outlined),
+            title: Text(l10n.termsTitle),
+            trailing: const Icon(Icons.chevron_right_rounded,
+                color: AppColors.textSecondary),
+            onTap: () => context.push('/legal/terms'),
+          ),
+          const Divider(),
+          _SectionHeader(l10n.sectionData),
           Padding(
             padding: const EdgeInsets.all(16),
             child: ElevatedButton.icon(
@@ -123,7 +166,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 backgroundColor: AppColors.urgent,
               ),
               icon: const Icon(Icons.delete_forever),
-              label: Text(_resetting ? 'Resetting...' : 'Reset All Data'),
+              label: Text(_resetting ? l10n.resetting : l10n.resetAllData),
               onPressed: _resetting ? null : _confirmReset,
             ),
           ),

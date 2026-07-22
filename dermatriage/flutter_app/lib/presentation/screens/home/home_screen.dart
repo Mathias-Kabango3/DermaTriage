@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/theme/app_shadows.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/common/app_bottom_nav.dart';
 import '../../widgets/home/action_card.dart';
@@ -15,6 +16,7 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final String? username = context.watch<AuthProvider>().displayName;
+    final AppLocalizations l10n = AppLocalizations.of(context);
 
     return Scaffold(
       body: Column(
@@ -37,14 +39,20 @@ class HomeScreen extends StatelessWidget {
                         children: <Widget>[
                           ActionCard.primary(
                             icon: Icons.camera_alt_rounded,
-                            label: 'Start New Triage',
+                            label: l10n.homeStartTriage,
                             onTap: () => context.push('/patient/register'),
                           ),
                           const SizedBox(height: AppSpacing.md),
                           ActionCard.secondary(
                             icon: Icons.history_rounded,
-                            label: 'View History',
+                            label: l10n.homeViewHistory,
                             onTap: () => context.go('/history'),
+                          ),
+                          const SizedBox(height: AppSpacing.md),
+                          ActionCard.secondary(
+                            icon: Icons.volunteer_activism_rounded,
+                            label: l10n.contributeCardLabel,
+                            onTap: () => context.push('/contribute'),
                           ),
                         ],
                       ),
