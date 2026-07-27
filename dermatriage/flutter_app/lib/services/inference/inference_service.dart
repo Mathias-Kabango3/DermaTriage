@@ -35,7 +35,8 @@ class InferenceService {
     // excluded so this reflects the compute the <2 s requirement targets.
     final Stopwatch stopwatch = Stopwatch()..start();
     final input = ImageProcessor.preprocess(bytes);
-    final List<double> logits = _interpreter.predict(input);
+    final ModelOutputs out = _interpreter.run(input);
+    final List<double> logits = out.logits;
     stopwatch.stop();
     final int inferenceMs = stopwatch.elapsedMilliseconds;
 
@@ -58,6 +59,7 @@ class InferenceService {
       heatmapPath: null,
       timestamp: DateTime.now(),
       inferenceMs: inferenceMs,
+      embedding: out.embedding,
     );
   }
 

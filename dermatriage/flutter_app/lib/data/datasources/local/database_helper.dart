@@ -56,8 +56,40 @@ class DatabaseHelper {
     }
     // v4: patient name, so History can identify who an encounter belongs to.
     if (oldVersion < 4) {
-      await db.execute(
-          "ALTER TABLE $tablePatient ADD COLUMN name TEXT NOT NULL DEFAULT ''");
+      await _addColumnIfMissing(
+          db, tablePatient, 'name', "name TEXT NOT NULL DEFAULT ''");
+    }
+    // v5: case-retrieval summary on each encounter (explainability layer).
+    if (oldVersion < 5) {
+      await _addColumnIfMissing(db, tableEncounter, 'retrieval_top1_label',
+          'retrieval_top1_label TEXT');
+      await _addColumnIfMissing(db, tableEncounter,
+          'retrieval_top1_similarity', 'retrieval_top1_similarity REAL');
+      await _addColumnIfMissing(db, tableEncounter, 'retrieval_agreement',
+          'retrieval_agreement INTEGER');
+    }
+  }
+
+  /// Adds [column] to [table] only if it isn't already there.
+  ///
+  /// Guards against a mismatch between the recorded schema version and the
+  /// table's actual columns — e.g. a device carrying a database file from an
+  /// earlier development build where this column was already present under a
+  /// different version number. Without this check, `ALTER TABLE ... ADD
+  /// COLUMN` on an already-existing column throws `duplicate column name` and
+  /// the database fails to open at all, taking down every feature, not just
+  /// the one that happened to trigger the migration.
+  Future<void> _addColumnIfMissing(
+    Database db,
+    String table,
+    String column,
+    String columnDefSql,
+  ) async {
+    final List<Map<String, dynamic>> info =
+        await db.rawQuery('PRAGMA table_info($table)');
+    final bool exists = info.any((Map<String, dynamic> row) => row['name'] == column);
+    if (!exists) {
+      await db.execute('ALTER TABLE $table ADD COLUMN $columnDefSql');
     }
   }
 
@@ -101,6 +133,9 @@ class DatabaseHelper {
         heatmap_path TEXT,
         synced INTEGER NOT NULL DEFAULT 0,
         chw_notes TEXT,
+        retrieval_top1_label TEXT,
+        retrieval_top1_similarity REAL,
+        retrieval_agreement INTEGER,
         FOREIGN KEY (patient_id) REFERENCES $tablePatient (patient_id)
           ON DELETE CASCADE,
         FOREIGN KEY (disease_id) REFERENCES $tableDiseaseClass (disease_id)

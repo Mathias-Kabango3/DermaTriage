@@ -1,1 +1,1 @@
-dermatriage-mobilenetv3s-distilled-5class-diverse-fp32
+dermatriage-mobilenetv3s-distilled-5class-diverse-fp32-embedding

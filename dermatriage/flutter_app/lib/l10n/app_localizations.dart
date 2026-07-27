@@ -154,6 +154,17 @@ class AppLocalizations {
       '${_t('lowConfMsgA')} $percent% ${_t('lowConfMsgB')}';
   String get retakeTitle => _t('retakeTitle');
   String get retakeMsg => _t('retakeMsg');
+  // Case retrieval ("similar confirmed cases").
+  String get similarCasesTitle => _t('similarCasesTitle');
+  String get similarCasesLoading => _t('similarCasesLoading');
+  String get noReferenceCases => _t('noReferenceCases');
+  String similarCasesResembles(String label) =>
+      '${_t('resemblesA')} $label ${_t('resemblesB')}';
+  String matchSummary(int matchCount, int avgPercent) =>
+      '$matchCount/3 ${_t('matchesWord')}, $avgPercent% ${_t('similarityWord')}';
+  String get agreementSupport => _t('agreementSupport');
+  String disagreementCaution(String label) =>
+      '${_t('disagreementA')} $label ${_t('disagreementB')}';
   String inferenceLabel(String seconds) => '${_t('inferenceWord')}: $seconds s';
   String withinTarget(String sec) => '· ${_t('withinWord')} $sec s ${_t('targetWord')}';
   String overTarget(String sec) => '· ${_t('overWord')} $sec s ${_t('targetWord')}';
@@ -242,6 +253,7 @@ class AppLocalizations {
   String get consentTitle => _t('consentTitle');
   String get consentAgree => _t('consentAgree');
   String get consentPrototype => _t('consentPrototype');
+  String get consentDataLocation => _t('consentDataLocation');
   String get consentLegalIntro => _t('consentLegalIntro');
   String get consentLegalAnd => _t('consentLegalAnd');
 
@@ -365,6 +377,16 @@ class AppLocalizations {
         'photo. If you are still concerned, refer the patient.',
     'retakeTitle': 'Please retake the photo',
     'retakeMsg': 'Please take a clear, close-up photo and try again.',
+    'similarCasesTitle': 'Similar confirmed cases',
+    'similarCasesLoading': 'Finding similar cases…',
+    'noReferenceCases': 'No reference cases available for this result.',
+    'resemblesA': 'This closely resembles confirmed',
+    'resemblesB': 'cases',
+    'matchesWord': 'matches',
+    'similarityWord': 'similarity',
+    'agreementSupport': 'Similar confirmed cases support this result.',
+    'disagreementA': 'Similar cases suggest',
+    'disagreementB': '— consider referral.',
     'inferenceWord': 'Inference',
     'withinWord': 'within',
     'overWord': 'over',
@@ -464,6 +486,11 @@ class AppLocalizations {
     'consentAgree': 'I understand and agree',
     'consentPrototype':
         'This app is a research prototype, not an approved medical device.',
+    'consentDataLocation':
+        'Patient data never leaves this device. Your CHW account, and any '
+        'healthy-skin photo you choose to contribute, are stored outside '
+        'Rwanda on Firebase and Cloudinary — continuing means you consent to '
+        'that, as required by Rwanda\'s data protection law.',
     'consentLegalIntro': 'By continuing, you agree to our',
     'consentLegalAnd': 'and',
     'legalSection': 'Legal',
@@ -587,6 +614,16 @@ class AppLocalizations {
         'kwa muganga.',
     'retakeTitle': 'Ongera ufate ifoto',
     'retakeMsg': 'Fata ifoto isobanutse, yegereye, wongere ugerageze.',
+    'similarCasesTitle': 'Indwara zisa zemejwe',
+    'similarCasesLoading': 'Gushaka indwara zisa…',
+    'noReferenceCases': 'Nta ndwara zo kugereranya ziboneka kuri iki gisubizo.',
+    'resemblesA': 'Iki gisubizo gisa n\'indwara zemejwe za',
+    'resemblesB': '',
+    'matchesWord': 'bihuye',
+    'similarityWord': 'bisa',
+    'agreementSupport': 'Indwara zisa zemejwe zishyigikira iki gisubizo.',
+    'disagreementA': 'Indwara zisa zerekana',
+    'disagreementB': '— tekereza kohereza umurwayi.',
     'inferenceWord': 'Isuzuma',
     'withinWord': 'muri',
     'overWord': 'hejuru ya',
@@ -689,6 +726,12 @@ class AppLocalizations {
     'consentPrototype':
         'Iyi porogaramu ni igerageza ry’ubushakashatsi, si igikoresho '
             'cy’ubuvuzi cyemewe.',
+    'consentDataLocation':
+        'Amakuru y’abarwayi ntabwo asohoka kuri iyi telefone. Konti yawe '
+            'y’umujyanama, n’ifoto y’uruhu rusanzwe wemeye gutanga, bibikwa '
+            'hanze ya Rwanda kuri Firebase na Cloudinary — gukomeza bisobanura '
+            'ko wemeye ibyo, nk’uko itegeko ry’u Rwanda ryerekeye kubungabunga '
+            'amakuru bisaba.',
     'consentLegalIntro': 'Mukomeza, mwemeye',
     'consentLegalAnd': 'na',
     'legalSection': 'Amategeko',

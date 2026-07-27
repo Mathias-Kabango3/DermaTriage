@@ -23,6 +23,10 @@ class TriageResult {
   /// run). Transient — measured at runtime and shown to the CHW; not persisted.
   final int? inferenceMs;
 
+  /// L2-normalised 576-d retrieval embedding, when the loaded model exposes
+  /// one. Transient — drives case retrieval at result time; not persisted.
+  final List<double>? embedding;
+
   const TriageResult({
     required this.predictedClassIndex,
     required this.predictedClassId,
@@ -34,6 +38,7 @@ class TriageResult {
     this.heatmapPath,
     required this.timestamp,
     this.inferenceMs,
+    this.embedding,
   });
 
   /// Whether this prediction is a real diagnosis (vs. a rejection outcome).
@@ -53,6 +58,7 @@ class TriageResult {
       heatmapPath: heatmapPath ?? this.heatmapPath,
       timestamp: timestamp,
       inferenceMs: inferenceMs,
+      embedding: embedding,
     );
   }
 

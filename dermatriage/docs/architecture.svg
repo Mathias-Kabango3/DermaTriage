@@ -1,0 +1,191 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1580" height="1080" viewBox="0 0 1580 1080" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif">
+<rect width="1580" height="1080" fill="#ffffff"/>
+<defs>
+  <filter id="soft" x="-8%" y="-8%" width="116%" height="120%">
+    <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#1f2933"
+      flood-opacity="0.10"/>
+  </filter>
+  <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8"
+    markerHeight="8" orient="auto-start-reverse">
+    <path d="M0,0 L10,5 L0,10 z" fill="#9aa5b1"/>
+  </marker>
+  <marker id="arrowT" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8"
+    markerHeight="8" orient="auto-start-reverse">
+    <path d="M0,0 L10,5 L0,10 z" fill="#00897b"/>
+  </marker>
+  <marker id="open" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="12"
+    markerHeight="12" orient="auto-start-reverse">
+    <path d="M1,1 L11,6 L1,11" fill="none" stroke="#52606d"
+      stroke-width="1.4"/>
+  </marker>
+  <marker id="openT" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="12"
+    markerHeight="12" orient="auto-start-reverse">
+    <path d="M1,1 L11,6 L1,11" fill="none" stroke="#00897b"
+      stroke-width="1.4"/>
+  </marker>
+  <marker id="tri" viewBox="0 0 14 14" refX="12" refY="7" markerWidth="14"
+    markerHeight="14" orient="auto-start-reverse">
+    <path d="M1,1 L13,7 L1,13 z" fill="#ffffff" stroke="#52606d"
+      stroke-width="1.3"/>
+  </marker>
+</defs>
+<rect x="40" y="36" width="5" height="22" rx="2.5" ry="2.5" fill="#00695c"/>
+<text x="56" y="47" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="21" font-weight="700" fill="#1f2933" text-anchor="start">DermaTriage — System Architecture</text>
+<text x="56" y="67" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#7b8794" text-anchor="start">Offline-first on-device triage · cloud sync for the healthy-skin data flywheel</text>
+<rect x="1170" y="28" width="372" height="96" rx="10" ry="10" fill="#f6f8fa" stroke="#cbd2d9" stroke-width="1.2"/>
+<line x1="1188" y1="54" x2="1222" y2="54" stroke="#52606d" stroke-width="1.6" marker-end="url(#arrow)"/>
+<text x="1230" y="58" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#52606d" text-anchor="start">on-device / offline path</text>
+<line x1="1188" y1="78" x2="1222" y2="78" stroke="#00897b" stroke-width="1.6" marker-end="url(#arrowT)"/>
+<text x="1230" y="82" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#52606d" text-anchor="start">cloud / online path</text>
+<line x1="1188" y1="102" x2="1222" y2="102" stroke="#00897b" stroke-width="1.6" stroke-dasharray="6 5" marker-end="url(#arrowT)"/>
+<text x="1230" y="106" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#52606d" text-anchor="start">data flywheel (retraining)</text>
+<circle cx="96" cy="314" r="13" fill="#e2f1ef" stroke="#00695c" stroke-width="1.6"/>
+<path d="M76,362 C76,338 116,338 116,362" fill="#e2f1ef" stroke="#00695c" stroke-width="1.6"/>
+<text x="96" y="382" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="700" fill="#1f2933" text-anchor="middle">Community</text>
+<text x="96" y="398" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="10.5" font-weight="400" fill="#7b8794" text-anchor="middle">Health Worker</text>
+<rect x="200" y="140" width="486" height="520" rx="14" ry="14" fill="#ffffff" stroke="#00695c" stroke-width="2" filter="url(#soft)"/>
+<rect x="200" y="140" width="486" height="46" rx="14" ry="14" fill="#e2f1ef"/>
+<rect x="200" y="172" width="486" height="14" rx="0" ry="0" fill="#e2f1ef"/>
+<rect x="212" y="147" width="32" height="32" rx="8" ry="8" fill="#ffffff" stroke="#cbd2d9" stroke-width="1.2"/>
+<g transform="translate(218,153) scale(0.83333)"><path d="M14.314 0L2.3 12 6 15.7 21.684.013h-7.357zm.014 11.072L7.857 17.53l6.47 6.47H21.7l-6.46-6.468 6.46-6.46h-7.37z" fill="#02569B"/></g>
+<rect x="248" y="147" width="32" height="32" rx="8" ry="8" fill="#ffffff" stroke="#cbd2d9" stroke-width="1.2"/>
+<g transform="translate(254,153) scale(0.83333)"><path d="M18.4395 5.5586c-.675 1.1664-1.352 2.3318-2.0274 3.498-.0366-.0155-.0742-.0286-.1113-.043-1.8249-.6957-3.484-.8-4.42-.787-1.8551.0185-3.3544.4643-4.2597.8203-.084-.1494-1.7526-3.021-2.0215-3.4864a1.1451 1.1451 0 0 0-.1406-.1914c-.3312-.364-.9054-.4859-1.379-.203-.475.282-.7136.9361-.3886 1.5019 1.9466 3.3696-.0966-.2158 1.9473 3.3593.0172.031-.4946.2642-1.3926 1.0177C2.8987 12.176.452 14.772 0 18.9902h24c-.119-1.1108-.3686-2.099-.7461-3.0683-.7438-1.9118-1.8435-3.2928-2.7402-4.1836a12.1048 12.1048 0 0 0-2.1309-1.6875c.6594-1.122 1.312-2.2559 1.9649-3.3848.2077-.3615.1886-.7956-.0079-1.1191a1.1001 1.1001 0 0 0-.8515-.5332c-.5225-.0536-.9392.3128-1.0488.5449zm-.0391 8.461c.3944.5926.324 1.3306-.1563 1.6503-.4799.3197-1.188.0985-1.582-.4941-.3944-.5927-.324-1.3307.1563-1.6504.4727-.315 1.1812-.1086 1.582.4941zM7.207 13.5273c.4803.3197.5506 1.0577.1563 1.6504-.394.5926-1.1038.8138-1.584.4941-.48-.3197-.5503-1.0577-.1563-1.6504.4008-.6021 1.1087-.8106 1.584-.4941z" fill="#249B60"/></g>
+<text x="292" y="161" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="14.5" font-weight="700" fill="#00695c" text-anchor="start">DermaTriage Mobile App</text>
+<text x="292" y="177" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="10.5" font-weight="400" fill="#52606d" text-anchor="start">Flutter · Dart · Android — Provider · go_router · l10n EN/RW</text>
+<rect x="218" y="206" width="450" height="176" rx="10" ry="10" fill="#f6f8fa" stroke="#cbd2d9" stroke-width="1.2"/>
+<text x="232" y="228" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12" font-weight="700" fill="#1f2933" text-anchor="start">On-device triage</text>
+<text x="368" y="228" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="10" font-weight="700" fill="#00695c" text-anchor="start">offline · &lt; 2 s</text>
+<rect x="234" y="246" width="96" height="74" rx="8" ry="8" fill="#ffffff" stroke="#cbd2d9" stroke-width="1.2"/>
+<text x="282.0" y="280" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="10.5" font-weight="700" fill="#1f2933" text-anchor="middle">Camera</text>
+<line x1="331" y1="283" x2="343" y2="283" stroke="#9aa5b1" stroke-width="1.5" marker-end="url(#arrow)"/>
+<rect x="344" y="246" width="96" height="74" rx="8" ry="8" fill="#ffffff" stroke="#cbd2d9" stroke-width="1.2"/>
+<text x="392.0" y="280" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="10.5" font-weight="700" fill="#1f2933" text-anchor="middle">Preprocess</text>
+<text x="392.0" y="293" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="10.5" font-weight="400" fill="#52606d" text-anchor="middle">224 · ImageNet</text>
+<line x1="441" y1="283" x2="453" y2="283" stroke="#9aa5b1" stroke-width="1.5" marker-end="url(#arrow)"/>
+<rect x="454" y="246" width="96" height="74" rx="8" ry="8" fill="#ffffff" stroke="#cbd2d9" stroke-width="1.2"/>
+<g transform="translate(491.0,256) scale(0.91667)"><path d="M1.292 5.856L11.54 0v24l-4.095-2.378V7.603l-6.168 3.564.015-5.31zm21.43 5.311l-.014-5.31L12.46 0v24l4.095-2.378V14.87l3.092 1.788-.018-4.618-3.074-1.756V7.603l6.168 3.564z" fill="#FF6F00"/></g>
+<text x="502.0" y="294" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="10.5" font-weight="700" fill="#1f2933" text-anchor="middle">TFLite model</text>
+<text x="502.0" y="307" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="10.5" font-weight="400" fill="#52606d" text-anchor="middle">MobileNetV3-S</text>
+<line x1="551" y1="283" x2="563" y2="283" stroke="#9aa5b1" stroke-width="1.5" marker-end="url(#arrow)"/>
+<rect x="564" y="246" width="96" height="74" rx="8" ry="8" fill="#ffffff" stroke="#cbd2d9" stroke-width="1.2"/>
+<text x="612.0" y="280" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="10.5" font-weight="700" fill="#1f2933" text-anchor="middle">Triage</text>
+<text x="612.0" y="293" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="10.5" font-weight="400" fill="#52606d" text-anchor="middle">result</text>
+<text x="232" y="372" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.5" font-weight="400" fill="#7b8794" text-anchor="start" font-style="italic">Grad-CAM heatmap removed — inference only</text>
+<rect x="218" y="400" width="450" height="100" rx="10" ry="10" fill="#f6f8fa" stroke="#cbd2d9" stroke-width="1.2"/>
+<rect x="230" y="412" width="34" height="34" rx="8" ry="8" fill="#ffffff" stroke="#cbd2d9" stroke-width="1.2"/>
+<g transform="translate(235,417) scale(1.00000)"><path d="M21.678.521c-1.032-.92-2.28-.55-3.513.544a8.71 8.71 0 0 0-.547.535c-2.109 2.237-4.066 6.38-4.674 9.544.237.48.422 1.093.544 1.561a13.044 13.044 0 0 1 .164.703s-.019-.071-.096-.296l-.05-.146a1.689 1.689 0 0 0-.033-.08c-.138-.32-.518-.995-.686-1.289-.143.423-.27.818-.376 1.176.484.884.778 2.4.778 2.4s-.025-.099-.147-.442c-.107-.303-.644-1.244-.772-1.464-.217.804-.304 1.346-.226 1.478.152.256.296.698.422 1.186.286 1.1.485 2.44.485 2.44l.017.224a22.41 22.41 0 0 0 .056 2.748c.095 1.146.273 2.13.5 2.657l.155-.084c-.334-1.038-.47-2.399-.41-3.967.09-2.398.642-5.29 1.661-8.304 1.723-4.55 4.113-8.201 6.3-9.945-1.993 1.8-4.692 7.63-5.5 9.788-.904 2.416-1.545 4.684-1.931 6.857.666-2.037 2.821-2.912 2.821-2.912s1.057-1.304 2.292-3.166c-.74.169-1.955.458-2.362.629-.6.251-.762.337-.762.337s1.945-1.184 3.613-1.72C21.695 7.9 24.195 2.767 21.678.521m-18.573.543A1.842 1.842 0 0 0 1.27 2.9v16.608a1.84 1.84 0 0 0 1.835 1.834h9.418a22.953 22.953 0 0 1-.052-2.707c-.006-.062-.011-.141-.016-.2a27.01 27.01 0 0 0-.473-2.378c-.121-.47-.275-.898-.369-1.057-.116-.197-.098-.31-.097-.432 0-.12.015-.245.037-.386a9.98 9.98 0 0 1 .234-1.045l.217-.028c-.017-.035-.014-.065-.031-.097l-.041-.381a32.8 32.8 0 0 1 .382-1.194l.2-.019c-.008-.016-.01-.038-.018-.053l-.043-.316c.63-3.28 2.587-7.443 4.8-9.791.066-.069.133-.128.198-.194Z" fill="#003B57"/></g>
+<text x="274" y="426" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12" font-weight="700" fill="#1f2933" text-anchor="start">Local store — SQLite (sqflite) · v4</text>
+<text x="274" y="444" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="10.5" font-weight="400" fill="#52606d" text-anchor="start">patients (+ name) · encounters · disease_class · users</text>
+<text x="274" y="460" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="10.5" font-weight="400" fill="#52606d" text-anchor="start">model_evaluations · healthy_skin_contributions (upload queue)</text>
+<rect x="518" y="474" width="150" height="16" rx="8" ry="8" fill="#e2f1ef" stroke="#00695c" stroke-width="1"/>
+<text x="593.0" y="485.5" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.5" font-weight="700" fill="#00695c" text-anchor="middle" letter-spacing="0.3">patient name · v4</text>
+<rect x="218" y="512" width="450" height="118" rx="10" ry="10" fill="#e2f1ef" stroke="#00695c" stroke-width="1.4"/>
+<text x="232" y="534" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12" font-weight="700" fill="#00897b" text-anchor="start">Healthy-skin contribution</text>
+<rect x="418" y="522" width="34" height="16" rx="8" ry="8" fill="#e2f1ef" stroke="#00695c" stroke-width="1"/>
+<text x="435.0" y="533.5" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.5" font-weight="700" fill="#00695c" text-anchor="middle" letter-spacing="0.3">new</text>
+<text x="232" y="554" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="10.5" font-weight="400" fill="#52606d" text-anchor="start">Pick body region + Fitzpatrick type → capture →</text>
+<text x="232" y="570" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="10.5" font-weight="400" fill="#52606d" text-anchor="start">queue offline → upload when online (connectivity_plus).</text>
+<text x="232" y="592" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="10.5" font-weight="400" fill="#52606d" text-anchor="start">ContributionUploadService: multipart → Cloudinary,</text>
+<text x="232" y="608" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="10.5" font-weight="400" fill="#52606d" text-anchor="start">then Firestore doc (Timestamp).</text>
+<rect x="770" y="150" width="300" height="196" rx="12" ry="12" fill="#ffffff" stroke="#cbd2d9" stroke-width="1.6" filter="url(#soft)"/>
+<rect x="784" y="164" width="36" height="36" rx="8" ry="8" fill="#ffffff" stroke="#cbd2d9" stroke-width="1.2"/>
+<g transform="translate(789,169) scale(1.08333)"><path d="M19.455 8.369c-.538-.748-1.778-2.285-3.681-4.569-.826-.991-1.535-1.832-1.884-2.245a146 146 0 0 0-.488-.576l-.207-.245-.113-.133-.022-.032-.01-.005L12.57 0l-.609.488c-1.555 1.246-2.828 2.851-3.681 4.64-.523 1.064-.864 2.105-1.043 3.176-.047.241-.088.489-.121.738-.209-.017-.421-.028-.632-.033-.018-.001-.035-.002-.059-.003a7.46 7.46 0 0 0-2.28.274l-.317.089-.163.286c-.765 1.342-1.198 2.869-1.252 4.416-.07 2.01.477 3.954 1.583 5.625 1.082 1.633 2.61 2.882 4.42 3.611l.236.095.071.025.003-.001a9.59 9.59 0 0 0 2.941.568q.171.006.342.006c1.273 0 2.513-.249 3.69-.742l.008.004.313-.145a9.63 9.63 0 0 0 3.927-3.335c1.01-1.49 1.577-3.234 1.641-5.042.075-2.161-.643-4.304-2.133-6.371m-7.083 6.695c.328 1.244.264 2.44-.191 3.558-1.135-1.12-1.967-2.352-2.475-3.665-.543-1.404-.87-2.74-.974-3.975.48.157.922.366 1.315.622 1.132.737 1.914 1.902 2.325 3.461zm.207 6.022c.482.368.99.712 1.513 1.028-.771.21-1.565.302-2.369.273a8 8 0 0 1-.373-.022c.458-.394.869-.823 1.228-1.279zm1.347-6.431c-.516-1.957-1.527-3.437-3.002-4.398-.647-.421-1.385-.741-2.194-.95.011-.134.026-.268.043-.4.014-.113.03-.216.046-.313.133-.689.332-1.37.589-2.025.099-.25.206-.499.321-.74l.004-.008c.177-.358.376-.719.61-1.105l.092-.152-.003-.001c.544-.851 1.197-1.627 1.942-2.311l.288.341c.672.796 1.304 1.548 1.878 2.237 1.291 1.549 2.966 3.583 3.612 4.48 1.277 1.771 1.893 3.579 1.83 5.375-.049 1.395-.461 2.755-1.195 3.933-.694 1.116-1.661 2.05-2.8 2.708-.636-.318-1.559-.839-2.539-1.599.79-1.575.952-3.28.479-5.072zm-2.575 5.397c-.725.939-1.587 1.55-2.09 1.856-.081-.029-.163-.06-.243-.093l-.065-.026c-1.49-.616-2.747-1.656-3.635-3.01-.907-1.384-1.356-2.993-1.298-4.653.041-1.19.338-2.327.882-3.379.316-.07.638-.114.96-.131l.084-.002c.162-.003.324-.003.478 0 .227.011.454.035.677.07.073 1.513.445 3.145 1.105 4.852.637 1.644 1.694 3.162 3.144 4.515z" fill="#F57C00"/></g>
+<text x="830" y="180" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#1f2933" text-anchor="start">Firebase</text>
+<text x="830" y="197" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="10.5" font-weight="400" fill="#7b8794" text-anchor="start">Google Cloud</text>
+<line x1="784" y1="212" x2="1056" y2="212" stroke="#cbd2d9" stroke-width="1"/>
+<text x="786" y="234" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" font-weight="700" fill="#1f2933" text-anchor="start">Authentication</text>
+<text x="786" y="250" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="10" font-weight="400" fill="#52606d" text-anchor="start">email/password + Google Sign-In</text>
+<text x="786" y="278" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" font-weight="700" fill="#1f2933" text-anchor="start">Cloud Firestore</text>
+<text x="786" y="294" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="10" font-weight="400" fill="#52606d" text-anchor="start">chws/{uid} — CHW profiles</text>
+<text x="786" y="310" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="10" font-weight="400" fill="#52606d" text-anchor="start">healthy_skin_contributions</text>
+<text x="786" y="326" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="10" font-weight="400" fill="#7b8794" text-anchor="start">(metadata + review status)</text>
+<rect x="770" y="380" width="300" height="150" rx="12" ry="12" fill="#ffffff" stroke="#cbd2d9" stroke-width="1.6" filter="url(#soft)"/>
+<rect x="784" y="394" width="36" height="36" rx="8" ry="8" fill="#ffffff" stroke="#cbd2d9" stroke-width="1.2"/>
+<g transform="translate(789,399) scale(1.08333)"><path d="M24 14.8598c0 2.1729-1.3757 3.974-3.5903 4.6996l-.0995.0318V17.989c1.3777-.5805 2.1869-1.7275 2.1869-3.1291-.0072-2-1.6087-3.6288-3.6082-3.6699h-.5964l-.1432-.5686c-.7025-2.8996-3.2886-4.9489-6.2721-4.97a6.3915 6.3915 0 0 0-5.811 3.664l-.1828.3757-.4175.0437a4.4311 4.4311 0 0 0-3.3052 2.088c-1.2803 2.0856-.6274 4.8143 1.4583 6.0947v1.6897h-.01l-.149-.0675a5.9402 5.9402 0 0 1-3.3658-4.3494c-.5787-3.2291 1.57-6.3161 4.7991-6.8948a7.8766 7.8766 0 0 1 6.9839-4.149c3.4724.025 6.535 2.28 7.5901 5.5883 2.5789.3366 4.5138 2.5245 4.5327 5.1251zm-15.3176-1.322h.5647a.0656.0656 0 0 0 .0457-.1113L7.084 11.2158l-.0007-.0007a.0656.0656 0 0 0-.0927.0007L4.78 13.4265a.0656.0656 0 0 0 .0477.1113h.5566a.0656.0656 0 0 1 .0657.0656v5.0574c0 .6588.534 1.1928 1.1928 1.1928H9.247a.0656.0656 0 0 0 .0457-.1113l-.33-.33a1.1928 1.1928 0 0 1-.348-.839v-4.97a.0676.0676 0 0 1 .0676-.0655zm9.769 2.5466h.5667a.0655.0655 0 0 0 .0457-.1133l-2.2107-2.2087-.0015-.0015a.0636.0636 0 0 0-.0899.0015L14.551 15.971a.0657.0657 0 0 0 .0457.1133h.5567a.0656.0656 0 0 1 .0656.0656v2.5108c0 .6588.534 1.1928 1.1928 1.1928h2.6063a.0655.0655 0 0 0 .0457-.1113l-.33-.33a1.1928 1.1928 0 0 1-.348-.839V16.15a.0656.0656 0 0 1 .0657-.0656zm-4.8844-1.2743h.5646a.0656.0656 0 0 0 .0477-.1114l-2.2107-2.2027-.0006-.0006a.0656.0656 0 0 0-.0928.0006l-2.2087 2.2068a.0656.0656 0 0 0 .0457.1113h.5626a.0676.0676 0 0 1 .0657.0676v3.7791c0 .6588.534 1.1928 1.1928 1.1928h2.5983a.0656.0656 0 0 0 .0477-.1113l-.332-.33a1.193 1.193 0 0 1-.346-.839v-3.6956c0-.0366.0291-.0665.0657-.0676z" fill="#3448C5"/></g>
+<text x="830" y="410" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#1f2933" text-anchor="start">Cloudinary</text>
+<text x="830" y="427" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="10.5" font-weight="400" fill="#7b8794" text-anchor="start">image CDN</text>
+<rect x="912" y="396" width="142" height="16" rx="8" ry="8" fill="#e2f1ef" stroke="#00695c" stroke-width="1"/>
+<text x="983.0" y="407.5" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.5" font-weight="700" fill="#00695c" text-anchor="middle" letter-spacing="0.3">replaces Storage</text>
+<line x1="784" y1="442" x2="1056" y2="442" stroke="#cbd2d9" stroke-width="1"/>
+<text x="786" y="464" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="10.5" font-weight="400" fill="#52606d" text-anchor="start">Hosts contribution photos</text>
+<text x="786" y="482" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="10.5" font-weight="400" fill="#52606d" text-anchor="start">unsigned upload preset</text>
+<text x="786" y="504" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="10.5" font-weight="700" fill="#00897b" text-anchor="start">returns public secure_url</text>
+<rect x="1170" y="150" width="372" height="340" rx="14" ry="14" fill="#ffffff" stroke="#00695c" stroke-width="2" filter="url(#soft)"/>
+<rect x="1170" y="150" width="372" height="46" rx="14" ry="14" fill="#e2f1ef"/>
+<rect x="1170" y="182" width="372" height="14" rx="0" ry="0" fill="#e2f1ef"/>
+<rect x="1182" y="157" width="32" height="32" rx="8" ry="8" fill="#ffffff" stroke="#cbd2d9" stroke-width="1.2"/>
+<g transform="translate(1188,163) scale(0.83333)"><path d="M18.665 21.978C16.758 23.255 14.465 24 12 24 5.377 24 0 18.623 0 12S5.377 0 12 0s12 5.377 12 12c0 3.583-1.574 6.801-4.067 9.001L9.219 7.2H7.2v9.596h1.615V9.251l9.85 12.727Zm-3.332-8.533 1.6 2.061V7.2h-1.6v6.245Z" fill="#111827"/></g>
+<rect x="1218" y="157" width="32" height="32" rx="8" ry="8" fill="#ffffff" stroke="#cbd2d9" stroke-width="1.2"/>
+<g transform="translate(1224,163) scale(0.83333)"><path d="M14.23 12.004a2.236 2.236 0 0 1-2.235 2.236 2.236 2.236 0 0 1-2.236-2.236 2.236 2.236 0 0 1 2.235-2.236 2.236 2.236 0 0 1 2.236 2.236zm2.648-10.69c-1.346 0-3.107.96-4.888 2.622-1.78-1.653-3.542-2.602-4.887-2.602-.41 0-.783.093-1.106.278-1.375.793-1.683 3.264-.973 6.365C1.98 8.917 0 10.42 0 12.004c0 1.59 1.99 3.097 5.043 4.03-.704 3.113-.39 5.588.988 6.38.32.187.69.275 1.102.275 1.345 0 3.107-.96 4.888-2.624 1.78 1.654 3.542 2.603 4.887 2.603.41 0 .783-.09 1.106-.275 1.374-.792 1.683-3.263.973-6.365C22.02 15.096 24 13.59 24 12.004c0-1.59-1.99-3.097-5.043-4.032.704-3.11.39-5.587-.988-6.38-.318-.184-.688-.277-1.092-.278zm-.005 1.09v.006c.225 0 .406.044.558.127.666.382.955 1.835.73 3.704-.054.46-.142.945-.25 1.44-.96-.236-2.006-.417-3.107-.534-.66-.905-1.345-1.727-2.035-2.447 1.592-1.48 3.087-2.292 4.105-2.295zm-9.77.02c1.012 0 2.514.808 4.11 2.28-.686.72-1.37 1.537-2.02 2.442-1.107.117-2.154.298-3.113.538-.112-.49-.195-.964-.254-1.42-.23-1.868.054-3.32.714-3.707.19-.09.4-.127.563-.132zm4.882 3.05c.455.468.91.992 1.36 1.564-.44-.02-.89-.034-1.345-.034-.46 0-.915.01-1.36.034.44-.572.895-1.096 1.345-1.565zM12 8.1c.74 0 1.477.034 2.202.093.406.582.802 1.203 1.183 1.86.372.64.71 1.29 1.018 1.946-.308.655-.646 1.31-1.013 1.95-.38.66-.773 1.288-1.18 1.87-.728.063-1.466.098-2.21.098-.74 0-1.477-.035-2.202-.093-.406-.582-.802-1.204-1.183-1.86-.372-.64-.71-1.29-1.018-1.946.303-.657.646-1.313 1.013-1.954.38-.66.773-1.286 1.18-1.868.728-.064 1.466-.098 2.21-.098zm-3.635.254c-.24.377-.48.763-.704 1.16-.225.39-.435.782-.635 1.174-.265-.656-.49-1.31-.676-1.947.64-.15 1.315-.283 2.015-.386zm7.26 0c.695.103 1.365.23 2.006.387-.18.632-.405 1.282-.66 1.933-.2-.39-.41-.783-.64-1.174-.225-.392-.465-.774-.705-1.146zm3.063.675c.484.15.944.317 1.375.498 1.732.74 2.852 1.708 2.852 2.476-.005.768-1.125 1.74-2.857 2.475-.42.18-.88.342-1.355.493-.28-.958-.646-1.956-1.1-2.98.45-1.017.81-2.01 1.085-2.964zm-13.395.004c.278.96.645 1.957 1.1 2.98-.45 1.017-.812 2.01-1.086 2.964-.484-.15-.944-.318-1.37-.5-1.732-.737-2.852-1.706-2.852-2.474 0-.768 1.12-1.742 2.852-2.476.42-.18.88-.342 1.356-.494zm11.678 4.28c.265.657.49 1.312.676 1.948-.64.157-1.316.29-2.016.39.24-.375.48-.762.705-1.158.225-.39.435-.788.636-1.18zm-9.945.02c.2.392.41.783.64 1.175.23.39.465.772.705 1.143-.695-.102-1.365-.23-2.006-.386.18-.63.406-1.282.66-1.933zM17.92 16.32c.112.493.2.968.254 1.423.23 1.868-.054 3.32-.714 3.708-.147.09-.338.128-.563.128-1.012 0-2.514-.807-4.11-2.28.686-.72 1.37-1.536 2.02-2.44 1.107-.118 2.154-.3 3.113-.54zm-11.83.01c.96.234 2.006.415 3.107.532.66.905 1.345 1.727 2.035 2.446-1.595 1.483-3.092 2.295-4.11 2.295-.22-.005-.406-.05-.553-.132-.666-.38-.955-1.834-.73-3.703.054-.46.142-.944.25-1.438zm4.56.64c.44.02.89.034 1.345.034.46 0 .915-.01 1.36-.034-.44.572-.895 1.095-1.345 1.565-.455-.47-.91-.993-1.36-1.565z" fill="#087EA4"/></g>
+<text x="1262" y="171" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="14.5" font-weight="700" fill="#00695c" text-anchor="start">Review Dashboard</text>
+<text x="1262" y="187" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="10.5" font-weight="400" fill="#52606d" text-anchor="start">Next.js 15 · React · TypeScript · Tailwind</text>
+<circle cx="1194" cy="224" r="3.4" fill="#00695c"/>
+<text x="1208" y="222" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" font-weight="700" fill="#1f2933" text-anchor="start">Reviewer queue</text>
+<text x="1208" y="238" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="10" font-weight="400" fill="#52606d" text-anchor="start">pending healthy-skin photos, live from Firestore</text>
+<circle cx="1194" cy="266" r="3.4" fill="#00695c"/>
+<text x="1208" y="264" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" font-weight="700" fill="#1f2933" text-anchor="start">Image detail review</text>
+<text x="1208" y="280" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="10" font-weight="400" fill="#52606d" text-anchor="start">loads photo from Cloudinary secure_url</text>
+<circle cx="1194" cy="308" r="3.4" fill="#00695c"/>
+<text x="1208" y="306" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" font-weight="700" fill="#1f2933" text-anchor="start">Approve / Reject</text>
+<text x="1208" y="322" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="10" font-weight="400" fill="#52606d" text-anchor="start">+ plausibility score (1–3), optional note</text>
+<circle cx="1194" cy="350" r="3.4" fill="#00695c"/>
+<text x="1208" y="348" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" font-weight="700" fill="#1f2933" text-anchor="start">My reviews</text>
+<text x="1208" y="364" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="10" font-weight="400" fill="#52606d" text-anchor="start">filtered by reviewer email</text>
+<circle cx="1194" cy="392" r="3.4" fill="#00695c"/>
+<text x="1208" y="390" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" font-weight="700" fill="#1f2933" text-anchor="start">Light + dark mode</text>
+<text x="1208" y="406" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="10" font-weight="400" fill="#52606d" text-anchor="start">app-logo brand · WCAG-legible type</text>
+<rect x="1452" y="208" width="86" height="16" rx="8" ry="8" fill="#e2f1ef" stroke="#00695c" stroke-width="1"/>
+<text x="1495.0" y="219.5" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.5" font-weight="700" fill="#00695c" text-anchor="middle" letter-spacing="0.3">dark mode</text>
+<circle cx="1356" cy="574" r="13" fill="#e2f1ef" stroke="#00695c" stroke-width="1.6"/>
+<path d="M1336,622 C1336,598 1376,598 1376,622" fill="#e2f1ef" stroke="#00695c" stroke-width="1.6"/>
+<text x="1356" y="642" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" font-weight="700" fill="#1f2933" text-anchor="middle">Reviewer /</text>
+<text x="1356" y="658" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="10.5" font-weight="400" fill="#7b8794" text-anchor="middle">Dermatologist</text>
+<rect x="200" y="740" width="870" height="232" rx="14" ry="14" fill="#eceff3" stroke="#cbd2d9" stroke-width="1.6"/>
+<rect x="216" y="756" width="36" height="36" rx="8" ry="8" fill="#ffffff" stroke="#cbd2d9" stroke-width="1.2"/>
+<g transform="translate(221,761) scale(1.08333)"><path d="M12.005 0L4.952 7.053a9.865 9.865 0 000 14.022 9.866 9.866 0 0014.022 0c3.984-3.9 3.986-10.205.085-14.023l-1.744 1.743c2.904 2.905 2.904 7.634 0 10.538s-7.634 2.904-10.538 0-2.904-7.634 0-10.538l4.647-4.646.582-.665zm3.568 3.899a1.327 1.327 0 00-1.327 1.327 1.327 1.327 0 001.327 1.328A1.327 1.327 0 0016.9 5.226 1.327 1.327 0 0015.573 3.9z" fill="#EE4C2C"/></g>
+<rect x="254" y="756" width="36" height="36" rx="8" ry="8" fill="#ffffff" stroke="#cbd2d9" stroke-width="1.2"/>
+<g transform="translate(259,761) scale(1.08333)"><path d="M1.292 5.856L11.54 0v24l-4.095-2.378V7.603l-6.168 3.564.015-5.31zm21.43 5.311l-.014-5.31L12.46 0v24l4.095-2.378V14.87l3.092 1.788-.018-4.618-3.074-1.756V7.603l6.168 3.564z" fill="#FF6F00"/></g>
+<text x="300" y="770" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#1f2933" text-anchor="start">ML Training Pipeline</text>
+<text x="300" y="787" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="10.5" font-weight="400" fill="#52606d" text-anchor="start">Python · PyTorch + timm — offline, on Kaggle GPUs</text>
+<rect x="224" y="824" width="148" height="92" rx="9" ry="9" fill="#ffffff" stroke="#cbd2d9" stroke-width="1.3"/>
+<text x="298.0" y="858" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" font-weight="700" fill="#1f2933" text-anchor="middle">EfficientNet-B0</text>
+<text x="298.0" y="894" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.5" font-weight="400" fill="#7b8794" text-anchor="middle" font-style="italic">teacher</text>
+<line x1="373" y1="870" x2="391" y2="870" stroke="#9aa5b1" stroke-width="1.6" marker-end="url(#arrow)"/>
+<rect x="394" y="824" width="148" height="92" rx="9" ry="9" fill="#ffffff" stroke="#cbd2d9" stroke-width="1.3"/>
+<text x="468.0" y="850" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" font-weight="700" fill="#1f2933" text-anchor="middle">Knowledge</text>
+<text x="468.0" y="865" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" font-weight="700" fill="#1f2933" text-anchor="middle">distillation</text>
+<line x1="543" y1="870" x2="561" y2="870" stroke="#9aa5b1" stroke-width="1.6" marker-end="url(#arrow)"/>
+<rect x="564" y="824" width="148" height="92" rx="9" ry="9" fill="#ffffff" stroke="#cbd2d9" stroke-width="1.3"/>
+<text x="638.0" y="858" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" font-weight="700" fill="#1f2933" text-anchor="middle">MobileNetV3-S</text>
+<text x="638.0" y="894" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.5" font-weight="400" fill="#7b8794" text-anchor="middle" font-style="italic">student</text>
+<line x1="713" y1="870" x2="731" y2="870" stroke="#9aa5b1" stroke-width="1.6" marker-end="url(#arrow)"/>
+<rect x="734" y="824" width="148" height="92" rx="9" ry="9" fill="#ffffff" stroke="#cbd2d9" stroke-width="1.3"/>
+<text x="808.0" y="858" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" font-weight="700" fill="#1f2933" text-anchor="middle">TFLite export</text>
+<text x="808.0" y="894" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.5" font-weight="400" fill="#7b8794" text-anchor="middle" font-style="italic">quantise</text>
+<line x1="883" y1="870" x2="901" y2="870" stroke="#9aa5b1" stroke-width="1.6" marker-end="url(#arrow)"/>
+<rect x="904" y="824" width="148" height="92" rx="9" ry="9" fill="#e2f1ef" stroke="#00695c" stroke-width="1.3"/>
+<text x="978.0" y="858" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" font-weight="700" fill="#1f2933" text-anchor="middle">Bundled model</text>
+<text x="978.0" y="894" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.5" font-weight="400" fill="#7b8794" text-anchor="middle" font-style="italic">dermatriage_diverse</text>
+<text x="224" y="958" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="10" font-weight="400" fill="#7b8794" text-anchor="start">PASSION (MICCAI 2024) + HAM10000 · WGAN-GP augmentation · 5-class: Fungal · Scabies · Eczema · healthy_skin · not_skin</text>
+<line x1="150" y1="300" x2="194" y2="300" stroke="#52606d" stroke-width="1.7" marker-end="url(#arrow)"/>
+<text x="174" y="292" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="10" font-weight="400" fill="#52606d" text-anchor="start">uses</text>
+<line x1="690" y1="232" x2="764" y2="232" stroke="#00897b" stroke-width="1.8" marker-end="url(#arrowT)"/>
+<text x="728.0" y="212" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.5" font-weight="400" fill="#00897b" text-anchor="middle">sign in +</text>
+<text x="728.0" y="224" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.5" font-weight="400" fill="#00897b" text-anchor="middle">metadata</text>
+<line x1="690" y1="452" x2="764" y2="452" stroke="#00897b" stroke-width="1.8" marker-end="url(#arrowT)"/>
+<text x="728.0" y="444" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.5" font-weight="400" fill="#00897b" text-anchor="middle">photo upload</text>
+<line x1="764" y1="478" x2="690" y2="478" stroke="#00897b" stroke-width="1.4" stroke-dasharray="4 4" marker-end="url(#arrowT)"/>
+<text x="728.0" y="496" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9" font-weight="400" fill="#7b8794" text-anchor="middle" font-style="italic">secure_url</text>
+<line x1="1074" y1="240" x2="1164" y2="240" stroke="#00897b" stroke-width="1.8" marker-end="url(#arrowT)" marker-start="url(#openT)"/>
+<text x="1086" y="226" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="10" font-weight="400" fill="#00897b" text-anchor="start">read queue /</text>
+<text x="1086" y="240" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="10" font-weight="400" fill="#00897b" text-anchor="start">write decision</text>
+<line x1="1074" y1="440" x2="1164" y2="440" stroke="#00897b" stroke-width="1.8" marker-end="url(#arrowT)"/>
+<text x="1090" y="426" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="10" font-weight="400" fill="#00897b" text-anchor="start">load images</text>
+<line x1="1356" y1="556" x2="1356" y2="496" stroke="#52606d" stroke-width="1.7" marker-end="url(#arrow)"/>
+<text x="1366" y="540" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="10" font-weight="400" fill="#52606d" text-anchor="start">reviews</text>
+<path d="M296,740 L296,690 L443.0,690 L443.0,664" fill="none" stroke="#52606d" stroke-width="1.7" stroke-dasharray="1 0" marker-end="url(#arrow)"/>
+<text x="310" y="684" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="10" font-weight="400" fill="#52606d" text-anchor="start">model.tflite bundled at build time</text>
+<path d="M1030,350 L1030,364 L1128,364 L1128,890 L1076,890" fill="none" stroke="#00897b" stroke-width="1.8" stroke-dasharray="7 5" marker-end="url(#arrowT)"/>
+<text x="1146" y="694" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="10" font-weight="700" fill="#00897b" text-anchor="start">approved healthy-skin</text>
+<text x="1146" y="710" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="10" font-weight="400" fill="#00897b" text-anchor="start">photos → retrain</text>
+</svg>

@@ -7,7 +7,7 @@
 class LegalText {
   LegalText._();
 
-  static const String lastUpdated = '21 July 2026';
+  static const String lastUpdated = '23 July 2026';
 
   static const String privacyPolicyEn = '''
 Last updated: $lastUpdated
@@ -24,7 +24,9 @@ Patient encounter data: When you run a triage, the app records the patient's nam
 
 On this device only: All patient and encounter data — including every photograph — is stored locally on this device in an offline database. It is never uploaded to any server, and the on-device AI model runs without an internet connection.
 
-In the cloud (Firebase): Only your CHW account details (name, email, region, facility) are sent to Firebase (a Google service) so you can sign in and recover your password. Patient data is never included in this.
+In the cloud (Firebase and Cloudinary): Your CHW account details (name, email, region, facility) are sent to Firebase (a Google service) so you can sign in and recover your password. If you choose to use the separate, optional "Contribute Healthy Skin Photo" feature, the photo you submit and its metadata (Fitzpatrick type, body region, your CHW id, facility, capture time) are uploaded to Cloudinary (an image-hosting service) and Firestore (Google), so the research team can use it to improve the AI model. Patient encounter data is never included in either of these — only your CHW account and anything you explicitly submit as a contribution leave this device.
+
+Cross-border storage and your consent: Firebase and Cloudinary store data outside Rwanda. Under Rwanda's Law N° 058/2021 relating to the protection of personal data and privacy, storing personal data outside Rwanda requires either your consent or authorisation from the National Cyber Security Authority (NCSA). We rely on your consent: by accepting this policy (at first launch, or when registering your CHW account) you consent to your CHW account data, and any healthy-skin contribution you choose to submit, being stored outside Rwanda on Firebase and Cloudinary for the purposes described above. Patient encounter data is unaffected — it never leaves this device, so no cross-border transfer of patient data occurs.
 
 3. What We Do Not Do
 
@@ -36,7 +38,7 @@ Patient and encounter data remains on the device until you delete it. You can pe
 
 5. Third Parties
 
-The app uses Firebase Authentication and Cloud Firestore (Google) solely to manage CHW accounts. Google's own privacy policy governs how it processes that account data.
+The app uses Firebase Authentication and Cloud Firestore (Google) to manage CHW accounts and, if you choose to contribute a healthy-skin photo, to store its metadata. Photos submitted through the contribution feature are hosted on Cloudinary. Google's and Cloudinary's own privacy policies govern how each processes that data.
 
 6. Children and Vulnerable Persons
 
@@ -58,11 +60,17 @@ Questions about this policy can be directed to the project maintainer, as listed
   /// First-pass Kinyarwanda summary — not a full translation. Needs review.
   static const String privacyPolicyRwSummary =
       'Incamake: Amakuru y’abarwayi (ifoto, imyaka, aho batuye, ubwoko '
-      'bw’uruhu) abikwa gusa kuri iyi telefone, ntabwo yoherezwa ku rubuga '
-      'rwa interineti. Ni amakuru y’umujyanama gusa (amazina, imeyili, '
+      'bw’uruhu, n’amazina) abikwa gusa kuri iyi telefone, ntabwo yoherezwa ku '
+      'rubuga rwa interineti. Ni amakuru y’umujyanama gusa (amazina, imeyili, '
       'akarere, ikigo) yoherezwa kuri Firebase kugira ngo yinjire muri konti '
-      'ye. Ushobora gusiba amakuru y’abarwayi igihe cyose muri Igenamiterere '
-      '→ Siba amakuru yose. Reba andika yuzuye mu Cyongereza hepfo.';
+      'ye; niba wemeye gutanga ifoto y’uruhu rusanzwe (feature yihitiyemo), '
+      'iyo foto yoherezwa kuri Cloudinary na Firestore (hanze ya Rwanda). '
+      'Itegeko ry’u Rwanda N° 058/2021 risaba uruhushya rwawe cyangwa '
+      'urw’Ikigo cy’Igihugu gishinzwe Umutekano w’Ikoranabuhanga (NCSA) '
+      'kugira ngo amakuru abikwe hanze y’igihugu — twemera uruhushya rwawe '
+      'igihe wemeye iri tegeko. Ushobora gusiba amakuru y’abarwayi igihe '
+      'cyose muri Igenamiterere → Siba amakuru yose. Reba andika yuzuye mu '
+      'Cyongereza hepfo.';
 
   static const String termsOfUseEn = '''
 Last updated: $lastUpdated

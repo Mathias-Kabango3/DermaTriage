@@ -8,8 +8,14 @@ class AppConstants {
   static const String modelVersionAssetPath = 'assets/models/model_version.txt';
 
   // Model / inference
+  // Bit-for-bit the deployed dermatriage_diverse classifier — no weights or
+  // ops were touched. This file only adds an offline flatbuffer edit that
+  // exposes the pre-classifier pooled-feature tensor as a second named output
+  // ("embedding", 576-d, not L2-normalised) for on-device case retrieval.
+  // Verified: max logit diff 0.000e+00 vs the original dermatriage_diverse.tflite
+  // across real PASSION images (see embedding_model_parity_test.dart).
   static const String modelAssetPath =
-      'assets/models/dermatriage_diverse.tflite';
+      'assets/models/dermatriage_diverse_embedding.tflite';
   static const int imageSize = 224;
   // MobileNetV3-Small distilled student: 5 classes
   // (Fungal, Scabies, Eczema, healthy_skin, not_skin).
@@ -31,7 +37,10 @@ class AppConstants {
   // v4 adds `patients.name` — a CHW-entered patient name so encounters in
   // History are recognisable (previously only date + classification were
   // shown, with no way to tell which patient a record belonged to).
-  static const int databaseVersion = 4;
+  // v5 adds retrieval summary columns on `encounters`
+  // (retrieval_top1_label/_similarity/_agreement) from the case-retrieval
+  // explainability layer.
+  static const int databaseVersion = 5;
 
   // Offline authentication
   /// Minimum length for CHW account passwords.

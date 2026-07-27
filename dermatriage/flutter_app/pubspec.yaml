@@ -79,3 +79,5 @@ flutter:
     - assets/models/
     - assets/images/
     - assets/fonts/
+    - assets/reference/
+    - assets/reference/images/

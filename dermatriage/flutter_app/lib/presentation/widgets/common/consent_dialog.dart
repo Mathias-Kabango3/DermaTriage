@@ -72,6 +72,14 @@ class ConsentDialog extends StatelessWidget {
               const SizedBox(height: 12),
               const Text(AppConstants.ethicsDisclaimer),
               const SizedBox(height: 16),
+              Text(
+                l10n.consentDataLocation,
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+              const SizedBox(height: 16),
               Wrap(
                 crossAxisAlignment: WrapCrossAlignment.center,
                 children: <Widget>[

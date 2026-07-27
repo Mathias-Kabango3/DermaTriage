@@ -13,6 +13,13 @@ class Encounter {
   final String? chwNotes;
   final DateTime encounterDate;
 
+  /// Top confirmed-case retrieval match at save time (explainability layer).
+  /// Null when retrieval didn't apply (not_skin/healthy_skin/low_confidence)
+  /// or the reference bank was unavailable.
+  final String? retrievalTop1Label;
+  final double? retrievalTop1Similarity;
+  final bool? retrievalAgreement;
+
   const Encounter({
     required this.encounterId,
     required this.patientId,
@@ -23,6 +30,9 @@ class Encounter {
     this.heatmapPath,
     this.chwNotes,
     required this.encounterDate,
+    this.retrievalTop1Label,
+    this.retrievalTop1Similarity,
+    this.retrievalAgreement,
   });
 
   Map<String, dynamic> toMap() {
@@ -36,6 +46,11 @@ class Encounter {
       'heatmap_path': heatmapPath,
       'chw_notes': chwNotes,
       'encounter_date': encounterDate.toIso8601String(),
+      'retrieval_top1_label': retrievalTop1Label,
+      'retrieval_top1_similarity': retrievalTop1Similarity,
+      'retrieval_agreement': retrievalAgreement == null
+          ? null
+          : (retrievalAgreement! ? 1 : 0),
     };
   }
 
@@ -50,6 +65,12 @@ class Encounter {
       heatmapPath: map['heatmap_path'] as String?,
       chwNotes: map['chw_notes'] as String?,
       encounterDate: DateTime.parse(map['encounter_date'] as String),
+      retrievalTop1Label: map['retrieval_top1_label'] as String?,
+      retrievalTop1Similarity:
+          (map['retrieval_top1_similarity'] as num?)?.toDouble(),
+      retrievalAgreement: (map['retrieval_agreement'] as int?) == null
+          ? null
+          : (map['retrieval_agreement'] as int) != 0,
     );
   }
 
@@ -63,6 +84,9 @@ class Encounter {
     String? heatmapPath,
     String? chwNotes,
     DateTime? encounterDate,
+    String? retrievalTop1Label,
+    double? retrievalTop1Similarity,
+    bool? retrievalAgreement,
   }) {
     return Encounter(
       encounterId: encounterId ?? this.encounterId,
@@ -74,6 +98,10 @@ class Encounter {
       heatmapPath: heatmapPath ?? this.heatmapPath,
       chwNotes: chwNotes ?? this.chwNotes,
       encounterDate: encounterDate ?? this.encounterDate,
+      retrievalTop1Label: retrievalTop1Label ?? this.retrievalTop1Label,
+      retrievalTop1Similarity:
+          retrievalTop1Similarity ?? this.retrievalTop1Similarity,
+      retrievalAgreement: retrievalAgreement ?? this.retrievalAgreement,
     );
   }
 }

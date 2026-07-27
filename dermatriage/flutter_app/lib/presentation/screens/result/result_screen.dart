@@ -12,11 +12,13 @@ import '../../../core/theme/colors.dart';
 import '../../../data/models/encounter.dart';
 import '../../../data/models/triage_result.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../services/retrieval/retrieval_service.dart';
 import '../../providers/history_provider.dart';
 import '../../providers/patient_provider.dart';
 import '../../providers/triage_provider.dart';
 import '../../widgets/result/confidence_bar.dart';
 import '../../widgets/result/inference_time_chip.dart';
+import '../../widgets/result/similar_cases_section.dart';
 import '../../widgets/result/triage_badge.dart';
 
 /// Displays the triage outcome for the captured lesion image.
@@ -53,7 +55,9 @@ class _ResultScreenState extends State<ResultScreen> {
   Future<void> _saveEncounter(TriageResult result) async {
     final PatientProvider patientProvider = context.read<PatientProvider>();
     final patient = patientProvider.currentPatient;
-    final File? image = context.read<TriageProvider>().capturedImage;
+    final TriageProvider triage = context.read<TriageProvider>();
+    final HistoryProvider history = context.read<HistoryProvider>();
+    final File? image = triage.capturedImage;
 
     if (patient == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -63,6 +67,17 @@ class _ResultScreenState extends State<ResultScreen> {
     }
 
     setState(() => _saving = true);
+
+    // Retrieval summary for the encounter record.
+    final RetrievalResult? retrieval = triage.retrieval;
+    String? retrievalTop1Label;
+    double? retrievalTop1Similarity;
+    bool? retrievalAgreement;
+    if (retrieval != null && !retrieval.isEmpty) {
+      retrievalTop1Label = retrieval.matches.first.reference.label;
+      retrievalTop1Similarity = retrieval.matches.first.similarity;
+      retrievalAgreement = retrieval.majorityLabel == result.predictedClassId;
+    }
 
     final encounter = Encounter(
       encounterId: const Uuid().v4(),
@@ -77,12 +92,15 @@ class _ResultScreenState extends State<ResultScreen> {
           ? null
           : _notesController.text.trim(),
       encounterDate: DateTime.now(),
+      retrievalTop1Label: retrievalTop1Label,
+      retrievalTop1Similarity: retrievalTop1Similarity,
+      retrievalAgreement: retrievalAgreement,
     );
 
-    await context.read<HistoryProvider>().saveEncounter(encounter);
+    await history.saveEncounter(encounter);
     if (!mounted) return;
 
-    context.read<TriageProvider>().reset();
+    triage.reset();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(AppLocalizations.of(context).encounterSaved)),
     );
@@ -204,6 +222,34 @@ class _ResultScreenState extends State<ResultScreen> {
             const SizedBox(height: 20),
             Center(child: InferenceTimeChip(inferenceMs: result.inferenceMs!)),
           ],
+          // healthy_skin has no bank coverage (PASSION contains no healthy or
+          // not_skin references) — a neutral message avoids implying
+          // misleading neighbours from other disease classes. not_skin gets
+          // no section at all: "similar confirmed skin conditions" makes no
+          // sense when the model's conclusion is that this isn't skin.
+          if (result.outcome == TriageOutcome.healthy) ...<Widget>[
+            const SizedBox(height: 20),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.background,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: AppColors.divider),
+              ),
+              child: Row(
+                children: <Widget>[
+                  const Icon(Icons.info_outline,
+                      size: 20, color: AppColors.textSecondary),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(l10n.noReferenceCases,
+                        style: const TextStyle(
+                            fontSize: 13, color: AppColors.textSecondary)),
+                  ),
+                ],
+              ),
+            ),
+          ],
           const SizedBox(height: 28),
           ElevatedButton.icon(
             icon: const Icon(Icons.camera_alt),
@@ -309,6 +355,13 @@ class _ResultScreenState extends State<ResultScreen> {
                     child: InferenceTimeChip(inferenceMs: result.inferenceMs!),
                   ),
                 ],
+                const SizedBox(height: 20),
+                // Similar confirmed cases (retrieval) + agreement indicator.
+                SimilarCasesSection(
+                  retrieval: provider.retrieval,
+                  loading: provider.retrievalLoading,
+                  predictedClassId: result.predictedClassId,
+                ),
                 const SizedBox(height: 20),
                 // CHW notes.
                 TextField(
