@@ -6,16 +6,6 @@ DermaTriage is a BSc Software Engineering capstone project (African Leadership U
 
 ---
 
-## Demo Video
-
-A walkthrough of the DermaTriage app in action:
-
-[![DermaTriage demo video](https://img.youtube.com/vi/XlURTichBIE/hqdefault.jpg)](https://youtu.be/XlURTichBIE)
-
-▶️ **[Watch the demo on YouTube](https://youtu.be/XlURTichBIE)**
-
----
-
 ## Download the App
 
 📱 **[Download DermaTriage APK](release/DermaTriage.apk?raw=true)** (~158 MB, Android)
